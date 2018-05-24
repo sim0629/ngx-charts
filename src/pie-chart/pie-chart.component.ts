@@ -20,10 +20,12 @@ import { BaseChartComponent } from '../common/base-chart.component';
       [showLegend]="legend"
       [legendOptions]="legendOptions"
       [activeEntries]="activeEntries"
+      [hiddenEntries]="hiddenEntries"
       [animations]="animations"
       (legendLabelActivate)="onActivate($event)"
       (legendLabelDeactivate)="onDeactivate($event)"
-      (legendLabelClick)="onClick($event)">
+      (legendLabelClick)="onClick($event)"
+      (legendLabelToggleHide)="toggleHidden($event)">>
       <svg:g [attr.transform]="translation" class="pie-chart chart">
         <svg:g ngx-charts-pie-series
           [colors]="colors"
@@ -66,6 +68,7 @@ export class PieChartComponent extends BaseChartComponent {
   @Input() arcWidth = 0.25;
   @Input() gradient: boolean;
   @Input() activeEntries: any[] = [];
+  @Input() hiddenEntries: any[] = [];
   @Input() tooltipDisabled: boolean = false;
   @Input() labelFormatting: any;
   @Input() trimLabels: boolean = true;
@@ -76,6 +79,8 @@ export class PieChartComponent extends BaseChartComponent {
   @Output() select = new EventEmitter();
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() hidden: EventEmitter<any> = new EventEmitter();
+  @Output() shown: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
 
@@ -85,12 +90,15 @@ export class PieChartComponent extends BaseChartComponent {
   data: any;
   colors: ColorHelper;
   domain: any;
+  labelDomain: any;
   dims: any;
   margin = [20, 20, 20, 20];
   legendOptions: any;
+  visableResults: any;
 
   update(): void {
     super.update();
+    this.visableResults = this.getVisableResults();
 
     if (this.labels) {
       this.margin = [30, 80, 30, 80];
@@ -118,10 +126,11 @@ export class PieChartComponent extends BaseChartComponent {
       this.innerRadius = this.outerRadius * (1 - this.arcWidth);
     }
 
-    this.domain = this.getDomain();
+    this.domain = this.getDomain(this.visableResults);
+    this.labelDomain = this.getDomain(this.results);
 
     // sort data according to domain
-    this.data = this.results.sort((a, b) => {
+    this.data = this.visableResults.sort((a, b) => {
       return this.domain.indexOf(a.name) - this.domain.indexOf(b.name);
     });
 
@@ -129,10 +138,44 @@ export class PieChartComponent extends BaseChartComponent {
     this.legendOptions = this.getLegendOptions();
   }
 
-  getDomain(): any[] {
+  getVisableResults(): any {
+    return this.results.filter(item => { return !this.isHidden(item); });
+    // return this.results.filter(res => res['show']);
+  }
+
+  isHidden(entry): boolean {
+    if(!this.hiddenEntries) return false;
+    const item = this.hiddenEntries.find(d => {
+      return d.name === entry.name;
+    });
+    return item !== undefined;
+  }
+
+  toggleHidden(item): void {
+    const idx = this.hiddenEntries.findIndex(d => {
+      return d.name === item.name;
+    });
+
+    if (idx > -1) {
+      console.log(`show ${item.name}`);
+      this.hiddenEntries.splice(idx, 1);
+      this.hiddenEntries = [...this.hiddenEntries];
+      this.shown.emit({ value: item, entries: this.hiddenEntries });
+      // console.log(this.hiddenEntries);
+    } else {
+      console.log(`hide ${item.name}`);
+      this.hiddenEntries = [ item, ...this.hiddenEntries ];
+      this.hidden.emit({ value: item, entries: this.hiddenEntries });
+      // console.log(this.hiddenEntries);
+    }
+
+    this.update();
+  }
+
+  getDomain(source: any): any[] {
     const items = [];
 
-    this.results.map(d => {
+    source.map(d => {
       let label = d.name;
       if (label.constructor.name === 'Date') {
         label = label.toLocaleDateString();
@@ -153,13 +196,13 @@ export class PieChartComponent extends BaseChartComponent {
   }
 
   setColors(): void {
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, this.customColors);
+    this.colors = new ColorHelper(this.scheme, 'ordinal', this.labelDomain, this.customColors);
   }
 
   getLegendOptions() {
     return {
       scaleType: 'ordinal',
-      domain: this.domain,
+      domain: this.labelDomain,
       colors: this.colors,
       title: this.legendTitle
     };

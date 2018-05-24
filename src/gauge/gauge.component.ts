@@ -362,7 +362,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
 
   toggleHidden(item): void {
     const idx = this.hiddenEntries.findIndex(d => {
-      return d.name === item.name && d.value === item.value;
+      return d.name === item.name;
     });
 
     if (idx > -1) {
@@ -382,7 +382,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   isHidden(entry): boolean {
     if(!this.hiddenEntries) return false;
     const item = this.hiddenEntries.find(d => {
-      return entry.name === d.name && entry.series === d.series;
+      return entry.name === d.name;
     });
     return item !== undefined;
   }
