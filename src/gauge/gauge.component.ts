@@ -25,10 +25,12 @@ import { ColorHelper } from '../common/color.helper';
       [showLegend]="legend"
       [legendOptions]="legendOptions"
       [activeEntries]="activeEntries"
+      [hiddenEntries]="hiddenEntries"
       [animations]="animations"
       (legendLabelClick)="onClick($event)"
       (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)">
+      (legendLabelDeactivate)="onDeactivate($event)"
+      (legendLabelToggleHide)="toggleHidden($event)">
       <svg:g [attr.transform]="transform" class="gauge chart">
         <svg:g *ngFor="let arc of arcs; trackBy:trackBy" [attr.transform]="rotation">
           <svg:g ngx-charts-gauge-arc
@@ -93,6 +95,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   @Input() startAngle: number = -120;
   @Input() angleSpan: number = 240;
   @Input() activeEntries: any[] = [];
+  @Input() hiddenEntries: any[] = [];
   @Input() axisTickFormatting: any;
   @Input() tooltipDisabled: boolean = false;
   @Input() valueFormatting: (value: any) => string;
@@ -102,6 +105,8 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() hidden: EventEmitter<any> = new EventEmitter();
+  @Output() shown: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
 
@@ -124,6 +129,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   arcs: any[];
   displayValue: string;
   legendOptions: any;
+  visableResults: any;
 
   ngAfterViewInit(): void {
     super.ngAfterViewInit();
@@ -132,6 +138,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
 
   update(): void {
     super.update();
+    this.visableResults = this.getVisableResults();
 
     if (!this.showAxis) {
       if (!this.margin) {
@@ -177,18 +184,23 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
     setTimeout(() => this.scaleText(), 50);
   }
 
+  getVisableResults(): any {
+    return this.results.filter(item => { return !this.isHidden(item); });
+    // return this.results.filter(res => res['show']);
+  }
+
   getArcs(): any[] {
     const arcs = [];
 
     const availableRadius = this.outerRadius * 0.7;
 
-    const radiusPerArc = Math.min(availableRadius / this.results.length, 10);
+    const radiusPerArc = Math.min(availableRadius / this.visableResults.length, 10);
     const arcWidth = radiusPerArc * 0.7;
-    this.textRadius = this.outerRadius - this.results.length * radiusPerArc;
+    this.textRadius = this.outerRadius - this.visableResults.length * radiusPerArc;
     this.cornerRadius = Math.floor(arcWidth / 2);
 
     let i = 0;
-    for (const d of this.results) {
+    for (const d of this.visableResults) {
       const outerRadius = this.outerRadius - (i * radiusPerArc);
       const innerRadius = outerRadius - arcWidth;
 
@@ -229,7 +241,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   }
 
   getValueDomain(): any[] {
-    const values = this.results.map(d => d.value);
+    const values = this.visableResults.map(d => d.value);
     const dataMin = Math.min(...values);
     const dataMax = Math.max(...values);
 
@@ -327,6 +339,33 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
     this.activeEntries = [...this.activeEntries];
 
     this.deactivate.emit({ value: item, entries: this.activeEntries });
+  }
+
+  toggleHidden(item): void {
+    const idx = this.hiddenEntries.findIndex(d => {
+      return d.name === item.name && d.value === item.value;
+    });
+
+    if (idx > -1) {
+      console.log(`show ${item.name}`);
+      this.hiddenEntries.splice(idx, 1);
+      this.hiddenEntries = [...this.hiddenEntries];
+      this.shown.emit({ value: item, entries: this.hiddenEntries });
+    } else {
+      console.log(`hide ${item.name}`);
+      this.hiddenEntries = [ item, ...this.hiddenEntries ];
+      this.hidden.emit({ value: item, entries: this.hiddenEntries });
+    }
+
+    this.update();
+  }
+
+  isHidden(entry): boolean {
+    if(!this.hiddenEntries) return false;
+    const item = this.hiddenEntries.find(d => {
+      return entry.name === d.name && entry.series === d.series;
+    });
+    return item !== undefined;
   }
 
   isActive(entry): boolean {

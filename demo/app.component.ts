@@ -267,6 +267,10 @@ export class AppComponent implements OnInit {
     }
   }
 
+  centerFormatting(val: any): string {
+      return val['name'] + ' ' + val['value'].toLocaleString(undefined, { maximumFractionDigits: 1 });
+  }
+
   updateData() {
     if (!this.realTimeData) {
       return;

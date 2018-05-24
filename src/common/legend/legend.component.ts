@@ -22,9 +22,11 @@ import { formatLabel } from '../label.helper';
               [formattedLabel]="entry.formattedLabel"
               [color]="entry.color"
               [isActive]="isActive(entry)"
+              [isHidden]="isHidden(entry)"
               (select)="labelClick.emit($event)"
               (activate)="activate($event)"
-              (deactivate)="deactivate($event)">
+              (deactivate)="deactivate($event)"
+              (toggleHide)="toggleHide($event)">
             </ngx-charts-legend-entry>
           </li>
         </ul>
@@ -43,10 +45,12 @@ export class LegendComponent implements OnChanges {
   @Input() height;
   @Input() width;
   @Input() activeEntries;
+  @Input() hiddenEntries;
 
   @Output() labelClick: EventEmitter<any> = new EventEmitter();
   @Output() labelActivate: EventEmitter<any> = new EventEmitter();
   @Output() labelDeactivate: EventEmitter<any> = new EventEmitter();
+  @Output() labelToggleHide: EventEmitter<any> = new EventEmitter();
 
   legendEntries: any[] = [];
 
@@ -65,6 +69,7 @@ export class LegendComponent implements OnChanges {
     const items = [];
 
     for(const label of this.data) {
+      console.log(label);
       const formattedLabel = formatLabel(label);
 
       const idx = items.findIndex((i) => {
@@ -91,12 +96,24 @@ export class LegendComponent implements OnChanges {
     return item !== undefined;
   }
 
+  isHidden(entry): boolean {
+    if(!this.hiddenEntries) return false;
+    const item = this.hiddenEntries.find(d => {
+      return entry.label === d.name;
+    });
+    return item !== undefined;
+  }
+
   activate(item) {
     this.labelActivate.emit(item);
   }
 
   deactivate(item) {
     this.labelDeactivate.emit(item);
+  }
+
+  toggleHide(item) {
+    this.labelToggleHide.emit(item);
   }
 
   trackBy(index, item): string {

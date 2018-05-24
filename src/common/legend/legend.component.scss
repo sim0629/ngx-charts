@@ -53,6 +53,12 @@
         color: #000;
       }
     }
+
+    .hidden {
+      .legend-label-text {
+        text-decoration: line-through;
+      }
+    }
   }
 
   .legend-label-color {

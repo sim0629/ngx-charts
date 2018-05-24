@@ -14,7 +14,8 @@ import {
       [title]="formattedLabel"
       tabindex="-1"
       [class.active]="isActive"
-      (click)="select.emit(formattedLabel)">
+      [class.hidden]="isHidden"
+      (click)="select.emit(formattedLabel); onToggleHide();">
       <span
         class="legend-label-color"
         [style.background-color]="color"
@@ -33,11 +34,17 @@ export class LegendEntryComponent {
   @Input() label: any;
   @Input() formattedLabel: string;
   @Input() isActive: boolean = false;
+  @Input() isHidden: boolean = false;
 
   @Output() select: EventEmitter<any> = new EventEmitter();
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() toggleHide: EventEmitter<any> = new EventEmitter();
   @Output() toggle: EventEmitter<any> = new EventEmitter();
+
+  onToggleHide(): void {
+    this.toggleHide.emit({name: this.label});
+  }
 
   get trimmedLabel(): string {
     return this.formattedLabel || '(empty)';
