@@ -66,7 +66,8 @@ import { ColorHelper } from '../common/color.helper';
             [style.textAnchor]="'middle'"
             [attr.transform]="textTransform"
             alignment-baseline="central">
-          <tspan x="0" dy="0">{{displayValue}}</tspan>
+          <tspan x="0" [attr.dy]="i > 0 ? '1.2em' : '0em'"
+            *ngFor="let val of displayData; let i = index">{{getCenterFormatting(val)}}</tspan>
           <tspan x="0" dy="1.2em">{{units}}</tspan>
         </svg:text>
 
@@ -99,6 +100,8 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   @Input() axisTickFormatting: any;
   @Input() tooltipDisabled: boolean = false;
   @Input() valueFormatting: (value: any) => string;
+  @Input() centerFormatting: (value: any) => string;
+  @Input() centerData: (value: any) => any;
 
   // Specify margins
   @Input() margin: any[];
@@ -127,7 +130,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   textTransform: string = 'scale(1, 1)';
   cornerRadius: number = 10;
   arcs: any[];
-  displayValue: string;
+  displayData: any;
   legendOptions: any;
   visableResults: any;
 
@@ -167,7 +170,7 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
     this.domain = this.getDomain();
     this.valueDomain = this.getValueDomain();
     this.valueScale = this.getValueScale();
-    this.displayValue = this.getDisplayValue();
+    this.displayData = this.getCenterData();
 
     this.outerRadius = Math.min(this.dims.width, this.dims.height) / 2;
 
@@ -267,31 +270,47 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
       .domain(this.valueDomain);
   }
 
-  getDisplayValue(): string {
-    const value = this.results.map(d => d.value).reduce((a, b) => a + b, 0);
-
+  getCenterFormatting(val: any): string {
     if(this.textValue && 0 !== this.textValue.length) {
       return this.textValue.toLocaleString();
     }
 
-    if (this.valueFormatting) {
-      return this.valueFormatting(value);
+    if (this.centerFormatting) {
+      return this.centerFormatting(val);
     }
+    return val['name'] + ' ' + val['value'].toLocaleString();
+  }
 
-    return value.toLocaleString();
+  getCenterData(): any {
+    console.log(this.visableResults);
+    if (this.centerData) {
+      return this.centerData(this.visableResults);
+    } else {
+      return this.visableResults;
+    }
   }
 
   scaleText(repeat: boolean = true): void {
-    const { width } = this.textEl.nativeElement.getBoundingClientRect();
+    const { width, height } = this.textEl.nativeElement.getBoundingClientRect();
     const oldScale = this.resizeScale;
+    let heightScale: number;
+    let widthScale: number;
 
     if (width === 0) {
-      this.resizeScale = 1;
+      widthScale = 1;
     } else {
-      const availableSpace = this.textRadius;
-      this.resizeScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
+      const availableSpace = this.textRadius * 1.5;
+      widthScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
+    }
+    
+    if (height === 0) {
+      heightScale = 1;
+    } else {
+      const availableSpace = this.textRadius * 1.5;
+      heightScale = Math.floor((availableSpace / (height / this.resizeScale)) * 100) / 100;
     }
 
+    this.resizeScale = Math.min(widthScale, heightScale);
     if (this.resizeScale !== oldScale) {
       this.textTransform = `scale(${this.resizeScale}, ${this.resizeScale})`;
       this.cd.markForCheck();
