@@ -32,10 +32,12 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
       [showLegend]="legend"
       [legendOptions]="legendOptions"
       [activeEntries]="activeEntries"
+      [hiddenEntries]="hiddenEntries"
       [animations]="animations"
       (legendLabelClick)="onClick($event)"
       (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)">
+      (legendLabelDeactivate)="onDeactivate($event)"
+      (legendLabelToggleHide)="toggleHidden($event)">
       <svg:defs>
         <svg:clipPath [attr.id]="clipPathId">
           <svg:rect
@@ -71,7 +73,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
           (dimensionsChanged)="updateYAxisWidth($event)">
         </svg:g>
         <svg:g [attr.clip-path]="clipPath">
-          <svg:g *ngFor="let series of results; trackBy:trackBy" [@animationState]="'active'">
+          <svg:g *ngFor="let series of visableResults; trackBy:trackBy" [@animationState]="'active'">
             <svg:g ngx-charts-line-series
               [xScale]="xScale"
               [yScale]="yScale"
@@ -92,14 +94,14 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
               [xSet]="xSet"
               [xScale]="xScale"
               [yScale]="yScale"
-              [results]="results"
+              [results]="visableResults"
               [colors]="colors"
               [tooltipDisabled]="tooltipDisabled"
               [tooltipTemplate]="seriesTooltipTemplate"
               (hover)="updateHoveredVertical($event)"
             />
 
-            <svg:g *ngFor="let series of results">
+            <svg:g *ngFor="let series of visableResults">
               <svg:g ngx-charts-circle-series
                 [xScale]="xScale"
                 [yScale]="yScale"
@@ -121,7 +123,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
       <svg:g ngx-charts-timeline
         *ngIf="timeline && scaleType != 'ordinal'"
         [attr.transform]="timelineTransform"
-        [results]="results"
+        [results]="visableResults"
         [view]="[timelineWidth, height]"
         [height]="timelineHeight"
         [scheme]="scheme"
@@ -129,7 +131,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
         [scaleType]="scaleType"
         [legend]="legend"
         (onDomainChange)="updateDomain($event)">
-        <svg:g *ngFor="let series of results; trackBy:trackBy">
+        <svg:g *ngFor="let series of visableResults; trackBy:trackBy">
           <svg:g ngx-charts-line-series
             [xScale]="timelineXScale"
             [yScale]="timelineYScale"
@@ -176,6 +178,7 @@ export class LineChartComponent extends BaseChartComponent {
   @Input() showGridLines: boolean = true;
   @Input() curve: any = curveLinear;
   @Input() activeEntries: any[] = [];
+  @Input() hiddenEntries: any[] = [];
   @Input() schemeType: string;
   @Input() rangeFillOpacity: number;
   @Input() xAxisTickFormatting: any;
@@ -194,6 +197,8 @@ export class LineChartComponent extends BaseChartComponent {
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() hidden: EventEmitter<any> = new EventEmitter();
+  @Output() shown: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
   @ContentChild('seriesTooltipTemplate') seriesTooltipTemplate: TemplateRef<any>;
@@ -202,6 +207,7 @@ export class LineChartComponent extends BaseChartComponent {
   xSet: any;
   xDomain: any;
   yDomain: any;
+  yLabelDomain: any;
   seriesDomain: any;
   yScale: any;
   xScale: any;
@@ -226,9 +232,11 @@ export class LineChartComponent extends BaseChartComponent {
   timelineXDomain: any;
   timelineTransform: any;
   timelinePadding: number = 10;
+  visableResults: any;
 
   update(): void {
     super.update();
+    this.visableResults = this.getVisableResults();
 
     this.dims = calculateViewDimensions({
       width: this.width,
@@ -253,7 +261,8 @@ export class LineChartComponent extends BaseChartComponent {
       this.xDomain = this.filteredDomain;
     }
 
-    this.yDomain = this.getYDomain();
+    this.yDomain = this.getYDomain(this.visableResults);
+    this.yLabelDomain = this.getYDomain(this.results);
     this.seriesDomain = this.getSeriesDomain();
 
     this.xScale = this.getXScale(this.xDomain, this.dims.width);
@@ -270,6 +279,38 @@ export class LineChartComponent extends BaseChartComponent {
     this.clipPath = `url(#${this.clipPathId})`;
   }
 
+  getVisableResults(): any {
+    return this.results.filter(item => { return !this.isHidden(item); });
+    // return this.results.filter(res => res['show']);
+  }
+
+  isHidden(entry): boolean {
+    if(!this.hiddenEntries) return false;
+    const item = this.hiddenEntries.find(d => {
+      return entry.name === d.name;
+    });
+    return item !== undefined;
+  }
+
+  toggleHidden(item): void {
+    const idx = this.hiddenEntries.findIndex(d => {
+      return d.name === item.name;
+    });
+
+    if (idx > -1) {
+      console.log(`show ${item.name}`);
+      this.hiddenEntries.splice(idx, 1);
+      this.hiddenEntries = [...this.hiddenEntries];
+      this.shown.emit({ value: item, entries: this.hiddenEntries });
+    } else {
+      console.log(`hide ${item.name}`);
+      this.hiddenEntries = [ item, ...this.hiddenEntries ];
+      this.hidden.emit({ value: item, entries: this.hiddenEntries });
+    }
+
+    this.update();
+  }
+
   updateTimeline(): void {
     if (this.timeline) {
       this.timelineWidth = this.dims.width;
@@ -281,7 +322,7 @@ export class LineChartComponent extends BaseChartComponent {
   }
 
   getXDomain(): any[] {
-    let values = getUniqueXDomainValues(this.results);
+    let values = getUniqueXDomainValues(this.visableResults);
 
     this.scaleType = this.getScaleType(values);
     let domain = [];
@@ -323,9 +364,9 @@ export class LineChartComponent extends BaseChartComponent {
     return domain;
   }
 
-  getYDomain(): any[] {
+  getYDomain(source: any): any[] {
     const domain = [];
-    for (const results of this.results) {
+    for (const results of source) {
       for (const d of results.series) {
         if (domain.indexOf(d.value) < 0) {
           domain.push(d.value);
@@ -459,7 +500,7 @@ export class LineChartComponent extends BaseChartComponent {
     if (this.schemeType === 'ordinal') {
       domain = this.seriesDomain;
     } else {
-      domain = this.yDomain;
+      domain = this.yLabelDomain;
     }
 
     this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
@@ -477,7 +518,7 @@ export class LineChartComponent extends BaseChartComponent {
       opts.colors = this.colors;
       opts.title = this.legendTitle;
     } else {
-      opts.domain = this.yDomain;
+      opts.domain = this.yLabelDomain;
       opts.colors = this.colors.scale;
     }
     return opts;
