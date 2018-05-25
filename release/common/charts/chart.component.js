@@ -19,6 +19,7 @@ var ChartComponent = /** @class */ (function () {
         this.legendLabelClick = new EventEmitter();
         this.legendLabelActivate = new EventEmitter();
         this.legendLabelDeactivate = new EventEmitter();
+        this.legendLabelToggleHide = new EventEmitter();
         this.tooltipService.injectionService.setRootViewContainer(this.vcr);
     }
     ChartComponent.prototype.ngOnChanges = function (changes) {
@@ -81,6 +82,10 @@ var ChartComponent = /** @class */ (function () {
     ], ChartComponent.prototype, "activeEntries", void 0);
     __decorate([
         Input(),
+        __metadata("design:type", Array)
+    ], ChartComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Input(),
         __metadata("design:type", Boolean)
     ], ChartComponent.prototype, "animations", void 0);
     __decorate([
@@ -95,11 +100,15 @@ var ChartComponent = /** @class */ (function () {
         Output(),
         __metadata("design:type", EventEmitter)
     ], ChartComponent.prototype, "legendLabelDeactivate", void 0);
+    __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], ChartComponent.prototype, "legendLabelToggleHide", void 0);
     ChartComponent = __decorate([
         Component({
             providers: [TooltipService],
             selector: 'ngx-charts-chart',
-            template: "\n    <div\n      class=\"ngx-charts-outer\"\n      [style.width.px]=\"view[0]\"\n      [@animationState]=\"'active'\"\n      [@.disabled]=\"!animations\">\n      <svg\n        class=\"ngx-charts\"\n        [attr.width]=\"chartWidth\"\n        [attr.height]=\"view[1]\">\n        <ng-content></ng-content>\n      </svg>\n      <ngx-charts-scale-legend\n        *ngIf=\"showLegend && legendType === 'scaleLegend'\"\n        class=\"chart-legend\"\n        [valueRange]=\"legendOptions.domain\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\">\n      </ngx-charts-scale-legend>\n      <ngx-charts-legend\n        *ngIf=\"showLegend && legendType === 'legend'\"\n        class=\"chart-legend\"\n        [data]=\"legendOptions.domain\"\n        [title]=\"legendOptions.title\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\"\n        [activeEntries]=\"activeEntries\"\n        (labelClick)=\"legendLabelClick.emit($event)\"\n        (labelActivate)=\"legendLabelActivate.emit($event)\"\n        (labelDeactivate)=\"legendLabelDeactivate.emit($event)\">\n      </ngx-charts-legend>\n    </div>\n  ",
+            template: "\n    <div\n      class=\"ngx-charts-outer\"\n      [style.width.px]=\"view[0]\"\n      [@animationState]=\"'active'\"\n      [@.disabled]=\"!animations\">\n      <svg\n        class=\"ngx-charts\"\n        [attr.width]=\"chartWidth\"\n        [attr.height]=\"view[1]\">\n        <ng-content></ng-content>\n      </svg>\n      <ngx-charts-scale-legend\n        *ngIf=\"showLegend && legendType === 'scaleLegend'\"\n        class=\"chart-legend\"\n        [valueRange]=\"legendOptions.domain\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\">\n      </ngx-charts-scale-legend>\n      <ngx-charts-legend\n        *ngIf=\"showLegend && legendType === 'legend'\"\n        class=\"chart-legend\"\n        [data]=\"legendOptions.domain\"\n        [title]=\"legendOptions.title\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\"\n        [activeEntries]=\"activeEntries\"\n        [hiddenEntries]=\"hiddenEntries\"\n        (labelClick)=\"legendLabelClick.emit($event)\"\n        (labelActivate)=\"legendLabelActivate.emit($event)\"\n        (labelDeactivate)=\"legendLabelDeactivate.emit($event)\"\n        (labelToggleHide)=\"legendLabelToggleHide.emit($event)\">\n      </ngx-charts-legend>\n    </div>\n  ",
             changeDetection: ChangeDetectionStrategy.OnPush,
             animations: [
                 trigger('animationState', [

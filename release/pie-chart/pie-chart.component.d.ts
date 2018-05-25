@@ -10,6 +10,7 @@ export declare class PieChartComponent extends BaseChartComponent {
     arcWidth: number;
     gradient: boolean;
     activeEntries: any[];
+    hiddenEntries: any[];
     tooltipDisabled: boolean;
     labelFormatting: any;
     trimLabels: boolean;
@@ -19,6 +20,8 @@ export declare class PieChartComponent extends BaseChartComponent {
     select: EventEmitter<{}>;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
+    hidden: EventEmitter<any>;
+    shown: EventEmitter<any>;
     tooltipTemplate: TemplateRef<any>;
     translation: string;
     outerRadius: number;
@@ -26,11 +29,16 @@ export declare class PieChartComponent extends BaseChartComponent {
     data: any;
     colors: ColorHelper;
     domain: any;
+    labelDomain: any;
     dims: any;
     margin: number[];
     legendOptions: any;
+    visableResults: any;
     update(): void;
-    getDomain(): any[];
+    getVisableResults(): any;
+    isHidden(entry: any): boolean;
+    toggleHidden(item: any): void;
+    getDomain(source: any): any[];
     onClick(data: any): void;
     setColors(): void;
     getLegendOptions(): {

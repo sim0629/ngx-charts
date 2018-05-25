@@ -133,7 +133,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, ".chart-legend {\n  display: inline-block;\n  padding: 0;\n  width: auto !important; }\n  .chart-legend .legend-title {\n    white-space: nowrap;\n    overflow: hidden;\n    margin-left: 10px;\n    margin-bottom: 5px;\n    font-size: 14px;\n    font-weight: bold; }\n  .chart-legend ul, .chart-legend li {\n    padding: 0;\n    margin: 0;\n    list-style: none; }\n  .chart-legend .legend-wrap {\n    width: calc(100% - 10px); }\n  .chart-legend .legend-labels {\n    line-height: 85%;\n    list-style: none;\n    text-align: left;\n    float: left;\n    width: 100%;\n    border-radius: 3px;\n    overflow-y: auto;\n    overflow-x: hidden;\n    white-space: nowrap;\n    background: rgba(0, 0, 0, 0.05); }\n  .chart-legend .legend-label {\n    cursor: pointer;\n    font-size: 90%;\n    margin: 8px;\n    color: #AFB7C8; }\n    .chart-legend .legend-label:hover {\n      color: #000;\n      -webkit-transition: 0.2s;\n      transition: 0.2s; }\n    .chart-legend .legend-label .active .legend-label-text {\n      color: #000; }\n  .chart-legend .legend-label-color {\n    display: inline-block;\n    height: 15px;\n    width: 15px;\n    margin-right: 5px;\n    color: #5b646b;\n    border-radius: 3px; }\n  .chart-legend .legend-label-text {\n    display: inline-block;\n    vertical-align: top;\n    line-height: 15px;\n    font-size: 12px;\n    width: calc(100% - 20px);\n    text-overflow: ellipsis;\n    white-space: nowrap;\n    overflow: hidden; }\n  .chart-legend .legend-title-text {\n    vertical-align: bottom;\n    display: inline-block;\n    line-height: 16px;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis; }\n", ""]);
+exports.push([module.i, ".chart-legend {\n  display: inline-block;\n  padding: 0;\n  width: auto !important; }\n  .chart-legend .legend-title {\n    white-space: nowrap;\n    overflow: hidden;\n    margin-left: 10px;\n    margin-bottom: 5px;\n    font-size: 14px;\n    font-weight: bold; }\n  .chart-legend ul, .chart-legend li {\n    padding: 0;\n    margin: 0;\n    list-style: none; }\n  .chart-legend .legend-wrap {\n    width: calc(100% - 10px); }\n  .chart-legend .legend-labels {\n    line-height: 85%;\n    list-style: none;\n    text-align: left;\n    float: left;\n    width: 100%;\n    border-radius: 3px;\n    overflow-y: auto;\n    overflow-x: hidden;\n    white-space: nowrap;\n    background: rgba(0, 0, 0, 0.05); }\n  .chart-legend .legend-label {\n    cursor: pointer;\n    font-size: 90%;\n    margin: 8px;\n    color: #AFB7C8; }\n    .chart-legend .legend-label:hover {\n      color: #000;\n      -webkit-transition: 0.2s;\n      transition: 0.2s; }\n    .chart-legend .legend-label .active .legend-label-text {\n      color: #000; }\n    .chart-legend .legend-label .hidden .legend-label-text {\n      text-decoration: line-through; }\n  .chart-legend .legend-label-color {\n    display: inline-block;\n    height: 15px;\n    width: 15px;\n    margin-right: 5px;\n    color: #5b646b;\n    border-radius: 3px; }\n  .chart-legend .legend-label-text {\n    display: inline-block;\n    vertical-align: top;\n    line-height: 15px;\n    font-size: 12px;\n    width: calc(100% - 20px);\n    text-overflow: ellipsis;\n    white-space: nowrap;\n    overflow: hidden; }\n  .chart-legend .legend-title-text {\n    vertical-align: bottom;\n    display: inline-block;\n    line-height: 16px;\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis; }\n", ""]);
 
 // exports
 
@@ -8030,6 +8030,7 @@ var ChartComponent = /** @class */ (function () {
         this.legendLabelClick = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.legendLabelActivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.legendLabelDeactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        this.legendLabelToggleHide = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.tooltipService.injectionService.setRootViewContainer(this.vcr);
     }
     ChartComponent.prototype.ngOnChanges = function (changes) {
@@ -8092,6 +8093,10 @@ var ChartComponent = /** @class */ (function () {
     ], ChartComponent.prototype, "activeEntries", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], ChartComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Boolean)
     ], ChartComponent.prototype, "animations", void 0);
     __decorate([
@@ -8106,11 +8111,15 @@ var ChartComponent = /** @class */ (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], ChartComponent.prototype, "legendLabelDeactivate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], ChartComponent.prototype, "legendLabelToggleHide", void 0);
     ChartComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             providers: [__WEBPACK_IMPORTED_MODULE_2__tooltip__["g" /* TooltipService */]],
             selector: 'ngx-charts-chart',
-            template: "\n    <div\n      class=\"ngx-charts-outer\"\n      [style.width.px]=\"view[0]\"\n      [@animationState]=\"'active'\"\n      [@.disabled]=\"!animations\">\n      <svg\n        class=\"ngx-charts\"\n        [attr.width]=\"chartWidth\"\n        [attr.height]=\"view[1]\">\n        <ng-content></ng-content>\n      </svg>\n      <ngx-charts-scale-legend\n        *ngIf=\"showLegend && legendType === 'scaleLegend'\"\n        class=\"chart-legend\"\n        [valueRange]=\"legendOptions.domain\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\">\n      </ngx-charts-scale-legend>\n      <ngx-charts-legend\n        *ngIf=\"showLegend && legendType === 'legend'\"\n        class=\"chart-legend\"\n        [data]=\"legendOptions.domain\"\n        [title]=\"legendOptions.title\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\"\n        [activeEntries]=\"activeEntries\"\n        (labelClick)=\"legendLabelClick.emit($event)\"\n        (labelActivate)=\"legendLabelActivate.emit($event)\"\n        (labelDeactivate)=\"legendLabelDeactivate.emit($event)\">\n      </ngx-charts-legend>\n    </div>\n  ",
+            template: "\n    <div\n      class=\"ngx-charts-outer\"\n      [style.width.px]=\"view[0]\"\n      [@animationState]=\"'active'\"\n      [@.disabled]=\"!animations\">\n      <svg\n        class=\"ngx-charts\"\n        [attr.width]=\"chartWidth\"\n        [attr.height]=\"view[1]\">\n        <ng-content></ng-content>\n      </svg>\n      <ngx-charts-scale-legend\n        *ngIf=\"showLegend && legendType === 'scaleLegend'\"\n        class=\"chart-legend\"\n        [valueRange]=\"legendOptions.domain\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\">\n      </ngx-charts-scale-legend>\n      <ngx-charts-legend\n        *ngIf=\"showLegend && legendType === 'legend'\"\n        class=\"chart-legend\"\n        [data]=\"legendOptions.domain\"\n        [title]=\"legendOptions.title\"\n        [colors]=\"legendOptions.colors\"\n        [height]=\"view[1]\"\n        [width]=\"legendWidth\"\n        [activeEntries]=\"activeEntries\"\n        [hiddenEntries]=\"hiddenEntries\"\n        (labelClick)=\"legendLabelClick.emit($event)\"\n        (labelActivate)=\"legendLabelActivate.emit($event)\"\n        (labelDeactivate)=\"legendLabelDeactivate.emit($event)\"\n        (labelToggleHide)=\"legendLabelToggleHide.emit($event)\">\n      </ngx-charts-legend>\n    </div>\n  ",
             changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush,
             animations: [
                 Object(__WEBPACK_IMPORTED_MODULE_1__angular_animations__["trigger"])('animationState', [
@@ -9450,11 +9459,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var LegendEntryComponent = /** @class */ (function () {
     function LegendEntryComponent() {
         this.isActive = false;
+        this.isHidden = false;
         this.select = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.activate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.deactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        this.toggleHide = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.toggle = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
     }
+    LegendEntryComponent.prototype.onToggleHide = function () {
+        this.toggleHide.emit({ name: this.label });
+    };
     Object.defineProperty(LegendEntryComponent.prototype, "trimmedLabel", {
         get: function () {
             return this.formattedLabel || '(empty)';
@@ -9485,6 +9499,10 @@ var LegendEntryComponent = /** @class */ (function () {
         __metadata("design:type", Boolean)
     ], LegendEntryComponent.prototype, "isActive", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Boolean)
+    ], LegendEntryComponent.prototype, "isHidden", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], LegendEntryComponent.prototype, "select", void 0);
@@ -9496,6 +9514,10 @@ var LegendEntryComponent = /** @class */ (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], LegendEntryComponent.prototype, "deactivate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], LegendEntryComponent.prototype, "toggleHide", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
@@ -9515,7 +9537,7 @@ var LegendEntryComponent = /** @class */ (function () {
     LegendEntryComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-legend-entry',
-            template: "\n    <span \n      [title]=\"formattedLabel\"\n      tabindex=\"-1\"\n      [class.active]=\"isActive\"\n      (click)=\"select.emit(formattedLabel)\">\n      <span\n        class=\"legend-label-color\"\n        [style.background-color]=\"color\"\n        (click)=\"toggle.emit(formattedLabel)\">\n      </span>\n      <span class=\"legend-label-text\">\n        {{trimmedLabel}}\n      </span>\n    </span>\n  ",
+            template: "\n    <span \n      [title]=\"formattedLabel\"\n      tabindex=\"-1\"\n      [class.active]=\"isActive\"\n      [class.hidden]=\"isHidden\"\n      (click)=\"select.emit(formattedLabel); onToggleHide();\">\n      <span\n        class=\"legend-label-color\"\n        [style.background-color]=\"color\"\n        (click)=\"toggle.emit(formattedLabel)\">\n      </span>\n      <span class=\"legend-label-text\">\n        {{trimmedLabel}}\n      </span>\n    </span>\n  ",
             changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush
         })
     ], LegendEntryComponent);
@@ -9566,6 +9588,7 @@ var LegendComponent = /** @class */ (function () {
         this.labelClick = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.labelActivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.labelDeactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        this.labelToggleHide = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         this.legendEntries = [];
     }
     LegendComponent.prototype.ngOnChanges = function (changes) {
@@ -9578,6 +9601,7 @@ var LegendComponent = /** @class */ (function () {
     LegendComponent.prototype.getLegendEntries = function () {
         var items = [];
         var _loop_1 = function (label) {
+            // console.log(label);
             var formattedLabel = Object(__WEBPACK_IMPORTED_MODULE_1__label_helper__["a" /* formatLabel */])(label);
             var idx = items.findIndex(function (i) {
                 return i.label === formattedLabel;
@@ -9605,11 +9629,22 @@ var LegendComponent = /** @class */ (function () {
         });
         return item !== undefined;
     };
+    LegendComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries)
+            return false;
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.label === d.name;
+        });
+        return item !== undefined;
+    };
     LegendComponent.prototype.activate = function (item) {
         this.labelActivate.emit(item);
     };
     LegendComponent.prototype.deactivate = function (item) {
         this.labelDeactivate.emit(item);
+    };
+    LegendComponent.prototype.toggleHide = function (item) {
+        this.labelToggleHide.emit(item);
     };
     LegendComponent.prototype.trackBy = function (index, item) {
         return item.label;
@@ -9639,6 +9674,10 @@ var LegendComponent = /** @class */ (function () {
         __metadata("design:type", Object)
     ], LegendComponent.prototype, "activeEntries", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Object)
+    ], LegendComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], LegendComponent.prototype, "labelClick", void 0);
@@ -9650,10 +9689,14 @@ var LegendComponent = /** @class */ (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], LegendComponent.prototype, "labelDeactivate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], LegendComponent.prototype, "labelToggleHide", void 0);
     LegendComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-legend',
-            template: "\n    <div [style.width.px]=\"width\">\n      <header class=\"legend-title\" *ngIf=\"title?.length > 0\">\n        <span class=\"legend-title-text\">{{title}}</span>\n      </header>\n      <div class=\"legend-wrap\">\n        <ul class=\"legend-labels\"\n          [style.max-height.px]=\"height - 45\">\n          <li\n            *ngFor=\"let entry of legendEntries; trackBy: trackBy\"\n            class=\"legend-label\">\n            <ngx-charts-legend-entry\n              [label]=\"entry.label\"\n              [formattedLabel]=\"entry.formattedLabel\"\n              [color]=\"entry.color\"\n              [isActive]=\"isActive(entry)\"\n              (select)=\"labelClick.emit($event)\"\n              (activate)=\"activate($event)\"\n              (deactivate)=\"deactivate($event)\">\n            </ngx-charts-legend-entry>\n          </li>\n        </ul>\n      </div>\n    </div>\n  ",
+            template: "\n    <div [style.width.px]=\"width\">\n      <header class=\"legend-title\" *ngIf=\"title?.length > 0\">\n        <span class=\"legend-title-text\">{{title}}</span>\n      </header>\n      <div class=\"legend-wrap\">\n        <ul class=\"legend-labels\"\n          [style.max-height.px]=\"height - 45\">\n          <li\n            *ngFor=\"let entry of legendEntries; trackBy: trackBy\"\n            class=\"legend-label\">\n            <ngx-charts-legend-entry\n              [label]=\"entry.label\"\n              [formattedLabel]=\"entry.formattedLabel\"\n              [color]=\"entry.color\"\n              [isActive]=\"isActive(entry)\"\n              [isHidden]=\"isHidden(entry)\"\n              (select)=\"labelClick.emit($event)\"\n              (activate)=\"activate($event)\"\n              (deactivate)=\"deactivate($event)\"\n              (toggleHide)=\"toggleHide($event)\">\n            </ngx-charts-legend-entry>\n          </li>\n        </ul>\n      </div>\n    </div>\n  ",
             styles: [__webpack_require__("./src/common/legend/legend.component.scss")],
             encapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewEncapsulation"].None,
             changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush
@@ -10058,6 +10101,15 @@ var Timeline = /** @class */ (function () {
             this.initialized = true;
         }
     };
+    Timeline.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
     Timeline.prototype.update = function () {
         this.dims = this.getDims();
         this.height = this.dims.height;
@@ -10076,6 +10128,9 @@ var Timeline = /** @class */ (function () {
         var values = [];
         for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
             var results = _a[_i];
+            if (this.isHidden({ name: results.name })) {
+                continue;
+            }
             for (var _b = 0, _c = results.series; _b < _c.length; _b++) {
                 var d = _c[_b];
                 if (!values.includes(d.name)) {
@@ -10203,6 +10258,10 @@ var Timeline = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Timeline.prototype, "height", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], Timeline.prototype, "hiddenEntries", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", Object)
     ], Timeline.prototype, "select", void 0);
@@ -10258,10 +10317,22 @@ var TooltipArea = /** @class */ (function () {
         this.tooltipDisabled = false;
         this.hover = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
     }
+    TooltipArea.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
     TooltipArea.prototype.getValues = function (xVal) {
         var results = [];
         for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
             var group = _a[_i];
+            if (this.isHidden({ name: group.name })) {
+                continue;
+            }
             var item = group.series.find(function (d) { return d.name.toString() === xVal.toString(); });
             var groupName = group.name;
             if (groupName instanceof Date) {
@@ -10421,6 +10492,10 @@ var TooltipArea = /** @class */ (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
     ], TooltipArea.prototype, "tooltipTemplate", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], TooltipArea.prototype, "hiddenEntries", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
         __metadata("design:type", Object)
@@ -12336,9 +12411,12 @@ var GaugeComponent = /** @class */ (function (_super) {
         _this.startAngle = -120;
         _this.angleSpan = 240;
         _this.activeEntries = [];
+        _this.hiddenEntries = [];
         _this.tooltipDisabled = false;
         _this.activate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.deactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.hidden = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.shown = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.resizeScale = 1;
         _this.rotation = '';
         _this.textTransform = 'scale(1, 1)';
@@ -12353,6 +12431,7 @@ var GaugeComponent = /** @class */ (function (_super) {
     GaugeComponent.prototype.update = function () {
         var _this = this;
         _super.prototype.update.call(this);
+        this.visableResults = this.getVisableResults();
         if (!this.showAxis) {
             if (!this.margin) {
                 this.margin = [10, 20, 10, 20];
@@ -12377,7 +12456,7 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.domain = this.getDomain();
         this.valueDomain = this.getValueDomain();
         this.valueScale = this.getValueScale();
-        this.displayValue = this.getDisplayValue();
+        this.displayData = this.getCenterData();
         this.outerRadius = Math.min(this.dims.width, this.dims.height) / 2;
         this.arcs = this.getArcs();
         this.setColors();
@@ -12388,15 +12467,20 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.rotation = "rotate(" + this.startAngle + ")";
         setTimeout(function () { return _this.scaleText(); }, 50);
     };
+    GaugeComponent.prototype.getVisableResults = function () {
+        var _this = this;
+        return this.results.filter(function (item) { return !_this.isHidden(item); });
+        // return this.results.filter(res => res['show']);
+    };
     GaugeComponent.prototype.getArcs = function () {
         var arcs = [];
         var availableRadius = this.outerRadius * 0.7;
-        var radiusPerArc = Math.min(availableRadius / this.results.length, 10);
+        var radiusPerArc = Math.min(availableRadius / this.visableResults.length, 10);
         var arcWidth = radiusPerArc * 0.7;
-        this.textRadius = this.outerRadius - this.results.length * radiusPerArc;
+        this.textRadius = this.outerRadius - this.visableResults.length * radiusPerArc;
         this.cornerRadius = Math.floor(arcWidth / 2);
         var i = 0;
-        for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this.visableResults; _i < _a.length; _i++) {
             var d = _a[_i];
             var outerRadius = this.outerRadius - (i * radiusPerArc);
             var innerRadius = outerRadius - arcWidth;
@@ -12431,7 +12515,7 @@ var GaugeComponent = /** @class */ (function (_super) {
         return this.results.map(function (d) { return d.name; });
     };
     GaugeComponent.prototype.getValueDomain = function () {
-        var values = this.results.map(function (d) { return d.value; });
+        var values = this.visableResults.map(function (d) { return d.value; });
         var dataMin = Math.min.apply(Math, values);
         var dataMax = Math.max.apply(Math, values);
         if (this.min !== undefined) {
@@ -12454,28 +12538,45 @@ var GaugeComponent = /** @class */ (function (_super) {
             .nice()
             .domain(this.valueDomain);
     };
-    GaugeComponent.prototype.getDisplayValue = function () {
-        var value = this.results.map(function (d) { return d.value; }).reduce(function (a, b) { return a + b; }, 0);
+    GaugeComponent.prototype.getCenterFormatting = function (val) {
         if (this.textValue && 0 !== this.textValue.length) {
             return this.textValue.toLocaleString();
         }
-        if (this.valueFormatting) {
-            return this.valueFormatting(value);
+        if (this.centerFormatting) {
+            return this.centerFormatting(val);
         }
-        return value.toLocaleString();
+        return val['name'] + ' ' + val['value'].toLocaleString();
+    };
+    GaugeComponent.prototype.getCenterData = function () {
+        if (this.centerData) {
+            return this.centerData(this.visableResults);
+        }
+        else {
+            return this.visableResults;
+        }
     };
     GaugeComponent.prototype.scaleText = function (repeat) {
         var _this = this;
         if (repeat === void 0) { repeat = true; }
-        var width = this.textEl.nativeElement.getBoundingClientRect().width;
+        var _a = this.textEl.nativeElement.getBoundingClientRect(), width = _a.width, height = _a.height;
         var oldScale = this.resizeScale;
+        var heightScale;
+        var widthScale;
         if (width === 0) {
-            this.resizeScale = 1;
+            widthScale = 1;
         }
         else {
-            var availableSpace = this.textRadius;
-            this.resizeScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
+            var availableSpace = this.textRadius * 1.5;
+            widthScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
         }
+        if (height === 0) {
+            heightScale = 1;
+        }
+        else {
+            var availableSpace = this.textRadius * 1.5;
+            heightScale = Math.floor((availableSpace / (height / this.resizeScale)) * 100) / 100;
+        }
+        this.resizeScale = Math.min(widthScale, heightScale);
         if (this.resizeScale !== oldScale) {
             this.textTransform = "scale(" + this.resizeScale + ", " + this.resizeScale + ")";
             this.cd.markForCheck();
@@ -12515,6 +12616,29 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.activeEntries.splice(idx, 1);
         this.activeEntries = this.activeEntries.slice();
         this.deactivate.emit({ value: item, entries: this.activeEntries });
+    };
+    GaugeComponent.prototype.toggleHidden = function (item) {
+        var idx = this.hiddenEntries.findIndex(function (d) {
+            return d.name === item.name;
+        });
+        if (idx > -1) {
+            this.hiddenEntries.splice(idx, 1);
+            this.hiddenEntries = this.hiddenEntries.slice();
+            this.shown.emit({ value: item, entries: this.hiddenEntries });
+        }
+        else {
+            this.hiddenEntries = [item].concat(this.hiddenEntries);
+            this.hidden.emit({ value: item, entries: this.hiddenEntries });
+        }
+        this.update();
+    };
+    GaugeComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries)
+            return false;
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
     };
     GaugeComponent.prototype.isActive = function (entry) {
         if (!this.activeEntries)
@@ -12581,6 +12705,10 @@ var GaugeComponent = /** @class */ (function (_super) {
     ], GaugeComponent.prototype, "activeEntries", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], GaugeComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Object)
     ], GaugeComponent.prototype, "axisTickFormatting", void 0);
     __decorate([
@@ -12591,6 +12719,14 @@ var GaugeComponent = /** @class */ (function (_super) {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Function)
     ], GaugeComponent.prototype, "valueFormatting", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Function)
+    ], GaugeComponent.prototype, "centerFormatting", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Function)
+    ], GaugeComponent.prototype, "centerData", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Array)
@@ -12604,6 +12740,14 @@ var GaugeComponent = /** @class */ (function (_super) {
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], GaugeComponent.prototype, "deactivate", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], GaugeComponent.prototype, "hidden", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], GaugeComponent.prototype, "shown", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('tooltipTemplate'),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
     ], GaugeComponent.prototype, "tooltipTemplate", void 0);
@@ -12614,7 +12758,7 @@ var GaugeComponent = /** @class */ (function (_super) {
     GaugeComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-gauge',
-            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\">\n      <svg:g [attr.transform]=\"transform\" class=\"gauge chart\">\n        <svg:g *ngFor=\"let arc of arcs; trackBy:trackBy\" [attr.transform]=\"rotation\">\n          <svg:g ngx-charts-gauge-arc\n            [backgroundArc]=\"arc.backgroundArc\"\n            [valueArc]=\"arc.valueArc\"\n            [cornerRadius]=\"cornerRadius\"\n            [colors]=\"colors\"\n            [isActive]=\"isActive(arc.valueArc.data)\"\n            [tooltipDisabled]=\"tooltipDisabled\"\n            [tooltipTemplate]=\"tooltipTemplate\"\n            [valueFormatting]=\"valueFormatting\"\n            [animations]=\"animations\"\n            (select)=\"onClick($event)\"\n            (activate)=\"onActivate($event)\"\n            (deactivate)=\"onDeactivate($event)\">\n          </svg:g>\n        </svg:g>\n\n        <svg:g ngx-charts-gauge-axis\n          *ngIf=\"showAxis\"\n          [bigSegments]=\"bigSegments\"\n          [smallSegments]=\"smallSegments\"\n          [min]=\"min\"\n          [max]=\"max\"\n          [radius]=\"outerRadius\"\n          [angleSpan]=\"angleSpan\"\n          [valueScale]=\"valueScale\"\n          [startAngle]=\"startAngle\"\n          [tickFormatting]=\"axisTickFormatting\">\n        </svg:g>\n\n        <svg:text #textEl\n            [style.textAnchor]=\"'middle'\"\n            [attr.transform]=\"textTransform\"\n            alignment-baseline=\"central\">\n          <tspan x=\"0\" dy=\"0\">{{displayValue}}</tspan>\n          <tspan x=\"0\" dy=\"1.2em\">{{units}}</tspan>\n        </svg:text>\n\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [hiddenEntries]=\"hiddenEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelToggleHide)=\"toggleHidden($event)\">\n      <svg:g [attr.transform]=\"transform\" class=\"gauge chart\">\n        <svg:g *ngFor=\"let arc of arcs; trackBy:trackBy\" [attr.transform]=\"rotation\">\n          <svg:g ngx-charts-gauge-arc\n            [backgroundArc]=\"arc.backgroundArc\"\n            [valueArc]=\"arc.valueArc\"\n            [cornerRadius]=\"cornerRadius\"\n            [colors]=\"colors\"\n            [isActive]=\"isActive(arc.valueArc.data)\"\n            [tooltipDisabled]=\"tooltipDisabled\"\n            [tooltipTemplate]=\"tooltipTemplate\"\n            [valueFormatting]=\"valueFormatting\"\n            [animations]=\"animations\"\n            (select)=\"onClick($event)\"\n            (activate)=\"onActivate($event)\"\n            (deactivate)=\"onDeactivate($event)\">\n          </svg:g>\n        </svg:g>\n\n        <svg:g ngx-charts-gauge-axis\n          *ngIf=\"showAxis\"\n          [bigSegments]=\"bigSegments\"\n          [smallSegments]=\"smallSegments\"\n          [min]=\"min\"\n          [max]=\"max\"\n          [radius]=\"outerRadius\"\n          [angleSpan]=\"angleSpan\"\n          [valueScale]=\"valueScale\"\n          [startAngle]=\"startAngle\"\n          [tickFormatting]=\"axisTickFormatting\">\n        </svg:g>\n\n        <svg:text #textEl\n            [style.textAnchor]=\"'middle'\"\n            [attr.transform]=\"textTransform\"\n            alignment-baseline=\"central\">\n          <tspan x=\"0\" [attr.dy]=\"i > 0 ? '1.2em' : '0em'\"\n            *ngFor=\"let val of displayData; let i = index\">{{getCenterFormatting(val)}}</tspan>\n          <tspan x=\"0\" dy=\"1.2em\">{{units}}</tspan>\n        </svg:text>\n\n      </svg:g>\n    </ngx-charts-chart>\n  ",
             styles: [
                 __webpack_require__("./src/common/base-chart.component.scss"),
                 __webpack_require__("./src/gauge/gauge.component.scss")
@@ -13712,7 +13856,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_color_helper__ = __webpack_require__("./src/common/color.helper.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__common_base_chart_component__ = __webpack_require__("./src/common/base-chart.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils_id__ = __webpack_require__("./src/utils/id.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__common_domain_helper__ = __webpack_require__("./src/common/domain.helper.ts");
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -13740,7 +13883,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
+// import { getUniqueXDomainValues } from '../common/domain.helper';
 var LineChartComponent = /** @class */ (function (_super) {
     __extends(LineChartComponent, _super);
     function LineChartComponent() {
@@ -13749,12 +13892,15 @@ var LineChartComponent = /** @class */ (function (_super) {
         _this.showGridLines = true;
         _this.curve = __WEBPACK_IMPORTED_MODULE_3_d3_shape__["curveLinear"];
         _this.activeEntries = [];
+        _this.hiddenEntries = [];
         _this.roundDomains = false;
         _this.tooltipDisabled = false;
         _this.showRefLines = false;
         _this.showRefLabels = true;
         _this.activate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.deactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.hidden = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.shown = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.margin = [10, 20, 10, 20];
         _this.xAxisHeight = 0;
         _this.yAxisWidth = 0;
@@ -13784,7 +13930,8 @@ var LineChartComponent = /** @class */ (function (_super) {
         if (this.filteredDomain) {
             this.xDomain = this.filteredDomain;
         }
-        this.yDomain = this.getYDomain();
+        this.yDomain = this.getYDomain(true);
+        this.yLabelDomain = this.getYDomain(false);
         this.seriesDomain = this.getSeriesDomain();
         this.xScale = this.getXScale(this.xDomain, this.dims.width);
         this.yScale = this.getYScale(this.yDomain, this.dims.height);
@@ -13795,6 +13942,32 @@ var LineChartComponent = /** @class */ (function (_super) {
         this.clipPathId = 'clip' + Object(__WEBPACK_IMPORTED_MODULE_7__utils_id__["a" /* id */])().toString();
         this.clipPath = "url(#" + this.clipPathId + ")";
     };
+    LineChartComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
+    LineChartComponent.prototype.toggleHidden = function (item) {
+        var idx = this.hiddenEntries.findIndex(function (d) {
+            return d.name === item.name;
+        });
+        if (idx > -1) {
+            // console.log(`show ${item.name}`);
+            this.hiddenEntries.splice(idx, 1);
+            this.hiddenEntries = this.hiddenEntries.slice();
+            this.shown.emit({ value: item, entries: this.hiddenEntries });
+        }
+        else {
+            // console.log(`hide ${item.name}`);
+            this.hiddenEntries = [item].concat(this.hiddenEntries);
+            this.hidden.emit({ value: item, entries: this.hiddenEntries });
+        }
+        this.update();
+    };
     LineChartComponent.prototype.updateTimeline = function () {
         if (this.timeline) {
             this.timelineWidth = this.dims.width;
@@ -13804,8 +13977,23 @@ var LineChartComponent = /** @class */ (function (_super) {
             this.timelineTransform = "translate(" + this.dims.xOffset + ", " + -this.margin[2] + ")";
         }
     };
+    LineChartComponent.prototype.getUniqueXDomainValues = function (results, hidden) {
+        if (hidden === void 0) { hidden = true; }
+        var valueSet = new Set();
+        for (var _i = 0, results_1 = results; _i < results_1.length; _i++) {
+            var result = results_1[_i];
+            if (this.isHidden({ name: result.name }) && hidden) {
+                continue;
+            }
+            for (var _a = 0, _b = result.series; _a < _b.length; _a++) {
+                var d = _b[_a];
+                valueSet.add(d.name);
+            }
+        }
+        return Array.from(valueSet);
+    };
     LineChartComponent.prototype.getXDomain = function () {
-        var values = Object(__WEBPACK_IMPORTED_MODULE_8__common_domain_helper__["a" /* getUniqueXDomainValues */])(this.results);
+        var values = this.getUniqueXDomainValues(this.results);
         this.scaleType = this.getScaleType(values);
         var domain = [];
         if (this.scaleType === 'linear') {
@@ -13844,10 +14032,13 @@ var LineChartComponent = /** @class */ (function (_super) {
         }
         return domain;
     };
-    LineChartComponent.prototype.getYDomain = function () {
+    LineChartComponent.prototype.getYDomain = function (hidden) {
         var domain = [];
         for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
             var results = _a[_i];
+            if (this.isHidden({ name: results.name }) && hidden) {
+                continue;
+            }
             for (var _b = 0, _c = results.series; _b < _c.length; _b++) {
                 var d = _c[_b];
                 if (domain.indexOf(d.value) < 0) {
@@ -13963,7 +14154,7 @@ var LineChartComponent = /** @class */ (function (_super) {
             domain = this.seriesDomain;
         }
         else {
-            domain = this.yDomain;
+            domain = this.yLabelDomain;
         }
         this.colors = new __WEBPACK_IMPORTED_MODULE_5__common_color_helper__["a" /* ColorHelper */](this.scheme, this.schemeType, domain, this.customColors);
     };
@@ -13980,7 +14171,7 @@ var LineChartComponent = /** @class */ (function (_super) {
             opts.title = this.legendTitle;
         }
         else {
-            opts.domain = this.yDomain;
+            opts.domain = this.yLabelDomain;
             opts.colors = this.colors.scale;
         }
         return opts;
@@ -14080,6 +14271,10 @@ var LineChartComponent = /** @class */ (function (_super) {
     ], LineChartComponent.prototype, "activeEntries", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], LineChartComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", String)
     ], LineChartComponent.prototype, "schemeType", void 0);
     __decorate([
@@ -14147,6 +14342,14 @@ var LineChartComponent = /** @class */ (function (_super) {
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], LineChartComponent.prototype, "deactivate", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], LineChartComponent.prototype, "hidden", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], LineChartComponent.prototype, "shown", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('tooltipTemplate'),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
     ], LineChartComponent.prototype, "tooltipTemplate", void 0);
@@ -14163,7 +14366,7 @@ var LineChartComponent = /** @class */ (function (_super) {
     LineChartComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-line-chart',
-            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\">\n      <svg:defs>\n        <svg:clipPath [attr.id]=\"clipPathId\">\n          <svg:rect\n            [attr.width]=\"dims.width + 10\"\n            [attr.height]=\"dims.height + 10\"\n            [attr.transform]=\"'translate(-5, -5)'\"/>\n        </svg:clipPath>\n      </svg:defs>\n      <svg:g [attr.transform]=\"transform\" class=\"line-chart chart\">\n        <svg:g ngx-charts-x-axis\n          *ngIf=\"xAxis\"\n          [xScale]=\"xScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showXAxisLabel\"\n          [labelText]=\"xAxisLabel\"\n          [tickFormatting]=\"xAxisTickFormatting\"\n          [ticks]=\"xAxisTicks\"\n          (dimensionsChanged)=\"updateXAxisHeight($event)\">\n        </svg:g>\n        <svg:g ngx-charts-y-axis\n          *ngIf=\"yAxis\"\n          [yScale]=\"yScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showYAxisLabel\"\n          [labelText]=\"yAxisLabel\"\n          [tickFormatting]=\"yAxisTickFormatting\"\n          [ticks]=\"yAxisTicks\"\n          [referenceLines]=\"referenceLines\"\n          [showRefLines]=\"showRefLines\"\n          [showRefLabels]=\"showRefLabels\"\n          (dimensionsChanged)=\"updateYAxisWidth($event)\">\n        </svg:g>\n        <svg:g [attr.clip-path]=\"clipPath\">\n          <svg:g *ngFor=\"let series of results; trackBy:trackBy\" [@animationState]=\"'active'\">\n            <svg:g ngx-charts-line-series\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [colors]=\"colors\"\n              [data]=\"series\"\n              [activeEntries]=\"activeEntries\"\n              [scaleType]=\"scaleType\"\n              [curve]=\"curve\"\n              [rangeFillOpacity]=\"rangeFillOpacity\"\n              [hasRange]=\"hasRange\"\n              [animations]=\"animations\"\n            />\n          </svg:g>\n\n          <svg:g *ngIf=\"!tooltipDisabled\" (mouseleave)=\"hideCircles()\">\n            <svg:g ngx-charts-tooltip-area\n              [dims]=\"dims\"\n              [xSet]=\"xSet\"\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [results]=\"results\"\n              [colors]=\"colors\"\n              [tooltipDisabled]=\"tooltipDisabled\"\n              [tooltipTemplate]=\"seriesTooltipTemplate\"\n              (hover)=\"updateHoveredVertical($event)\"\n            />\n\n            <svg:g *ngFor=\"let series of results\">\n              <svg:g ngx-charts-circle-series\n                [xScale]=\"xScale\"\n                [yScale]=\"yScale\"\n                [colors]=\"colors\"\n                [data]=\"series\"\n                [scaleType]=\"scaleType\"\n                [visibleValue]=\"hoveredVertical\"\n                [activeEntries]=\"activeEntries\"\n                [tooltipDisabled]=\"tooltipDisabled\"\n                [tooltipTemplate]=\"tooltipTemplate\"\n                (select)=\"onClick($event, series)\"\n                (activate)=\"onActivate($event)\"\n                (deactivate)=\"onDeactivate($event)\"\n              />\n            </svg:g>\n          </svg:g>\n        </svg:g>\n      </svg:g>\n      <svg:g ngx-charts-timeline\n        *ngIf=\"timeline && scaleType != 'ordinal'\"\n        [attr.transform]=\"timelineTransform\"\n        [results]=\"results\"\n        [view]=\"[timelineWidth, height]\"\n        [height]=\"timelineHeight\"\n        [scheme]=\"scheme\"\n        [customColors]=\"customColors\"\n        [scaleType]=\"scaleType\"\n        [legend]=\"legend\"\n        (onDomainChange)=\"updateDomain($event)\">\n        <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n          <svg:g ngx-charts-line-series\n            [xScale]=\"timelineXScale\"\n            [yScale]=\"timelineYScale\"\n            [colors]=\"colors\"\n            [data]=\"series\"\n            [scaleType]=\"scaleType\"\n            [curve]=\"curve\"\n            [hasRange]=\"hasRange\"\n            [animations]=\"animations\"\n          />\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [hiddenEntries]=\"hiddenEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelToggleHide)=\"toggleHidden($event)\">\n      <svg:defs>\n        <svg:clipPath [attr.id]=\"clipPathId\">\n          <svg:rect\n            [attr.width]=\"dims.width + 10\"\n            [attr.height]=\"dims.height + 10\"\n            [attr.transform]=\"'translate(-5, -5)'\"/>\n        </svg:clipPath>\n      </svg:defs>\n      <svg:g [attr.transform]=\"transform\" class=\"line-chart chart\">\n        <svg:g ngx-charts-x-axis\n          *ngIf=\"xAxis\"\n          [xScale]=\"xScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showXAxisLabel\"\n          [labelText]=\"xAxisLabel\"\n          [tickFormatting]=\"xAxisTickFormatting\"\n          [ticks]=\"xAxisTicks\"\n          (dimensionsChanged)=\"updateXAxisHeight($event)\">\n        </svg:g>\n        <svg:g ngx-charts-y-axis\n          *ngIf=\"yAxis\"\n          [yScale]=\"yScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showYAxisLabel\"\n          [labelText]=\"yAxisLabel\"\n          [tickFormatting]=\"yAxisTickFormatting\"\n          [ticks]=\"yAxisTicks\"\n          [referenceLines]=\"referenceLines\"\n          [showRefLines]=\"showRefLines\"\n          [showRefLabels]=\"showRefLabels\"\n          (dimensionsChanged)=\"updateYAxisWidth($event)\">\n        </svg:g>\n        <svg:g [attr.clip-path]=\"clipPath\">\n          <svg:g *ngFor=\"let series of results; trackBy:trackBy\" [@animationState]=\"'active'\">\n            <svg:g *ngIf=\"!isHidden(series)\">\n              <svg:g ngx-charts-line-series\n                [xScale]=\"xScale\"\n                [yScale]=\"yScale\"\n                [colors]=\"colors\"\n                [data]=\"series\"\n                [activeEntries]=\"activeEntries\"\n                [scaleType]=\"scaleType\"\n                [curve]=\"curve\"\n                [rangeFillOpacity]=\"rangeFillOpacity\"\n                [hasRange]=\"hasRange\"\n                [animations]=\"animations\"\n              />\n            </svg:g>\n          </svg:g>\n\n          <svg:g *ngIf=\"!tooltipDisabled\" (mouseleave)=\"hideCircles()\">\n            <svg:g ngx-charts-tooltip-area\n              [dims]=\"dims\"\n              [xSet]=\"xSet\"\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [results]=\"results\"\n              [colors]=\"colors\"\n              [hiddenEntries]=\"hiddenEntries\"\n              [tooltipDisabled]=\"tooltipDisabled\"\n              [tooltipTemplate]=\"seriesTooltipTemplate\"\n              (hover)=\"updateHoveredVertical($event)\"\n            />\n\n            <svg:g *ngFor=\"let series of results\">\n              <svg:g *ngIf=\"!isHidden(series)\">\n                <svg:g ngx-charts-circle-series\n                  [xScale]=\"xScale\"\n                  [yScale]=\"yScale\"\n                  [colors]=\"colors\"\n                  [data]=\"series\"\n                  [scaleType]=\"scaleType\"\n                  [visibleValue]=\"hoveredVertical\"\n                  [activeEntries]=\"activeEntries\"\n                  [tooltipDisabled]=\"tooltipDisabled\"\n                  [tooltipTemplate]=\"tooltipTemplate\"\n                  (select)=\"onClick($event, series)\"\n                  (activate)=\"onActivate($event)\"\n                  (deactivate)=\"onDeactivate($event)\"\n                />\n              </svg:g>\n            </svg:g>\n          </svg:g>\n        </svg:g>\n      </svg:g>\n      <svg:g ngx-charts-timeline\n        *ngIf=\"timeline && scaleType != 'ordinal'\"\n        [attr.transform]=\"timelineTransform\"\n        [results]=\"results\"\n        [view]=\"[timelineWidth, height]\"\n        [height]=\"timelineHeight\"\n        [scheme]=\"scheme\"\n        [customColors]=\"customColors\"\n        [scaleType]=\"scaleType\"\n        [legend]=\"legend\"\n        [hiddenEntries]=\"hiddenEntries\"\n        (onDomainChange)=\"updateDomain($event)\">\n        <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n          <svg:g *ngIf=\"!isHidden(series)\">\n            <svg:g ngx-charts-line-series\n              [xScale]=\"timelineXScale\"\n              [yScale]=\"timelineYScale\"\n              [colors]=\"colors\"\n              [data]=\"series\"\n              [scaleType]=\"scaleType\"\n              [curve]=\"curve\"\n              [hasRange]=\"hasRange\"\n              [animations]=\"animations\"\n            />\n          </svg:g>\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
             styles: [__webpack_require__("./src/common/base-chart.component.scss")],
             encapsulation: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewEncapsulation"].None,
             changeDetection: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ChangeDetectionStrategy"].OnPush,
@@ -15679,6 +15882,7 @@ var PieChartComponent = /** @class */ (function (_super) {
         _this.doughnut = false;
         _this.arcWidth = 0.25;
         _this.activeEntries = [];
+        _this.hiddenEntries = [];
         _this.tooltipDisabled = false;
         _this.trimLabels = true;
         _this.maxLabelLength = 10;
@@ -15686,12 +15890,15 @@ var PieChartComponent = /** @class */ (function (_super) {
         _this.select = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.activate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.deactivate = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.hidden = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
+        _this.shown = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"]();
         _this.margin = [20, 20, 20, 20];
         return _this;
     }
     PieChartComponent.prototype.update = function () {
         var _this = this;
         _super.prototype.update.call(this);
+        this.visableResults = this.getVisableResults();
         if (this.labels) {
             this.margin = [30, 80, 30, 80];
         }
@@ -15716,17 +15923,50 @@ var PieChartComponent = /** @class */ (function (_super) {
         if (this.doughnut) {
             this.innerRadius = this.outerRadius * (1 - this.arcWidth);
         }
-        this.domain = this.getDomain();
+        this.domain = this.getDomain(this.visableResults);
+        this.labelDomain = this.getDomain(this.results);
         // sort data according to domain
-        this.data = this.results.sort(function (a, b) {
+        this.data = this.visableResults.sort(function (a, b) {
             return _this.domain.indexOf(a.name) - _this.domain.indexOf(b.name);
         });
         this.setColors();
         this.legendOptions = this.getLegendOptions();
     };
-    PieChartComponent.prototype.getDomain = function () {
+    PieChartComponent.prototype.getVisableResults = function () {
+        var _this = this;
+        return this.results.filter(function (item) { return !_this.isHidden(item); });
+        // return this.results.filter(res => res['show']);
+    };
+    PieChartComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries)
+            return false;
+        var item = this.hiddenEntries.find(function (d) {
+            return d.name === entry.name;
+        });
+        return item !== undefined;
+    };
+    PieChartComponent.prototype.toggleHidden = function (item) {
+        var idx = this.hiddenEntries.findIndex(function (d) {
+            return d.name === item.name;
+        });
+        if (idx > -1) {
+            console.log("show " + item.name);
+            this.hiddenEntries.splice(idx, 1);
+            this.hiddenEntries = this.hiddenEntries.slice();
+            this.shown.emit({ value: item, entries: this.hiddenEntries });
+            // console.log(this.hiddenEntries);
+        }
+        else {
+            console.log("hide " + item.name);
+            this.hiddenEntries = [item].concat(this.hiddenEntries);
+            this.hidden.emit({ value: item, entries: this.hiddenEntries });
+            // console.log(this.hiddenEntries);
+        }
+        this.update();
+    };
+    PieChartComponent.prototype.getDomain = function (source) {
         var items = [];
-        this.results.map(function (d) {
+        source.map(function (d) {
             var label = d.name;
             if (label.constructor.name === 'Date') {
                 label = label.toLocaleDateString();
@@ -15744,12 +15984,12 @@ var PieChartComponent = /** @class */ (function (_super) {
         this.select.emit(data);
     };
     PieChartComponent.prototype.setColors = function () {
-        this.colors = new __WEBPACK_IMPORTED_MODULE_2__common_color_helper__["a" /* ColorHelper */](this.scheme, 'ordinal', this.domain, this.customColors);
+        this.colors = new __WEBPACK_IMPORTED_MODULE_2__common_color_helper__["a" /* ColorHelper */](this.scheme, 'ordinal', this.labelDomain, this.customColors);
     };
     PieChartComponent.prototype.getLegendOptions = function () {
         return {
             scaleType: 'ordinal',
-            domain: this.domain,
+            domain: this.labelDomain,
             colors: this.colors,
             title: this.legendTitle
         };
@@ -15806,6 +16046,10 @@ var PieChartComponent = /** @class */ (function (_super) {
     ], PieChartComponent.prototype, "activeEntries", void 0);
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Array)
+    ], PieChartComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
         __metadata("design:type", Boolean)
     ], PieChartComponent.prototype, "tooltipDisabled", void 0);
     __decorate([
@@ -15841,13 +16085,21 @@ var PieChartComponent = /** @class */ (function (_super) {
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
     ], PieChartComponent.prototype, "deactivate", void 0);
     __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], PieChartComponent.prototype, "hidden", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Output"])(),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["EventEmitter"])
+    ], PieChartComponent.prototype, "shown", void 0);
+    __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ContentChild"])('tooltipTemplate'),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["TemplateRef"])
     ], PieChartComponent.prototype, "tooltipTemplate", void 0);
     PieChartComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'ngx-charts-pie-chart',
-            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [animations]=\"animations\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelClick)=\"onClick($event)\">\n      <svg:g [attr.transform]=\"translation\" class=\"pie-chart chart\">\n        <svg:g ngx-charts-pie-series\n          [colors]=\"colors\"\n          [series]=\"data\"\n          [showLabels]=\"labels\"\n          [labelFormatting]=\"labelFormatting\"\n          [trimLabels]=\"trimLabels\"\n          [maxLabelLength]=\"maxLabelLength\"\n          [activeEntries]=\"activeEntries\"\n          [innerRadius]=\"innerRadius\"\n          [outerRadius]=\"outerRadius\"\n          [explodeSlices]=\"explodeSlices\"\n          [gradient]=\"gradient\"\n          [animations]=\"animations\"\n          [tooltipDisabled]=\"tooltipDisabled\"\n          [tooltipTemplate]=\"tooltipTemplate\"\n          [tooltipText]=\"tooltipText\"\n          (dblclick)=\"dblclick.emit($event)\"\n          (select)=\"onClick($event)\"\n          (activate)=\"onActivate($event)\"\n          (deactivate)=\"onDeactivate($event)\"\n        />\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [hiddenEntries]=\"hiddenEntries\"\n      [animations]=\"animations\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelToggleHide)=\"toggleHidden($event)\">>\n      <svg:g [attr.transform]=\"translation\" class=\"pie-chart chart\">\n        <svg:g ngx-charts-pie-series\n          [colors]=\"colors\"\n          [series]=\"data\"\n          [showLabels]=\"labels\"\n          [labelFormatting]=\"labelFormatting\"\n          [trimLabels]=\"trimLabels\"\n          [maxLabelLength]=\"maxLabelLength\"\n          [activeEntries]=\"activeEntries\"\n          [innerRadius]=\"innerRadius\"\n          [outerRadius]=\"outerRadius\"\n          [explodeSlices]=\"explodeSlices\"\n          [gradient]=\"gradient\"\n          [animations]=\"animations\"\n          [tooltipDisabled]=\"tooltipDisabled\"\n          [tooltipTemplate]=\"tooltipTemplate\"\n          [tooltipText]=\"tooltipText\"\n          (dblclick)=\"dblclick.emit($event)\"\n          (select)=\"onClick($event)\"\n          (activate)=\"onActivate($event)\"\n          (deactivate)=\"onDeactivate($event)\"\n        />\n      </svg:g>\n    </ngx-charts-chart>\n  ",
             styles: [
                 __webpack_require__("./src/common/base-chart.component.scss"),
                 __webpack_require__("./src/pie-chart/pie-chart.component.scss")

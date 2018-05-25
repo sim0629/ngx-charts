@@ -7,16 +7,20 @@ export declare class LegendComponent implements OnChanges {
     height: any;
     width: any;
     activeEntries: any;
+    hiddenEntries: any;
     labelClick: EventEmitter<any>;
     labelActivate: EventEmitter<any>;
     labelDeactivate: EventEmitter<any>;
+    labelToggleHide: EventEmitter<any>;
     legendEntries: any[];
     constructor(cd: ChangeDetectorRef);
     ngOnChanges(changes: SimpleChanges): void;
     update(): void;
     getLegendEntries(): any[];
     isActive(entry: any): boolean;
+    isHidden(entry: any): boolean;
     activate(item: any): void;
     deactivate(item: any): void;
+    toggleHide(item: any): void;
     trackBy(index: any, item: any): string;
 }

@@ -19,10 +19,22 @@ var TooltipArea = /** @class */ (function () {
         this.tooltipDisabled = false;
         this.hover = new EventEmitter();
     }
+    TooltipArea.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
     TooltipArea.prototype.getValues = function (xVal) {
         var results = [];
         for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
             var group = _a[_i];
+            if (this.isHidden({ name: group.name })) {
+                continue;
+            }
             var item = group.series.find(function (d) { return d.name.toString() === xVal.toString(); });
             var groupName = group.name;
             if (groupName instanceof Date) {
@@ -182,6 +194,10 @@ var TooltipArea = /** @class */ (function () {
         Input(),
         __metadata("design:type", TemplateRef)
     ], TooltipArea.prototype, "tooltipTemplate", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Array)
+    ], TooltipArea.prototype, "hiddenEntries", void 0);
     __decorate([
         Output(),
         __metadata("design:type", Object)

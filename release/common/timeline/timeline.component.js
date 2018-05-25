@@ -28,6 +28,15 @@ var Timeline = /** @class */ (function () {
             this.initialized = true;
         }
     };
+    Timeline.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
     Timeline.prototype.update = function () {
         this.dims = this.getDims();
         this.height = this.dims.height;
@@ -46,6 +55,9 @@ var Timeline = /** @class */ (function () {
         var values = [];
         for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
             var results = _a[_i];
+            if (this.isHidden({ name: results.name })) {
+                continue;
+            }
             for (var _b = 0, _c = results.series; _b < _c.length; _b++) {
                 var d = _c[_b];
                 if (!values.includes(d.name)) {
@@ -172,6 +184,10 @@ var Timeline = /** @class */ (function () {
         Input(),
         __metadata("design:type", Number)
     ], Timeline.prototype, "height", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Array)
+    ], Timeline.prototype, "hiddenEntries", void 0);
     __decorate([
         Output(),
         __metadata("design:type", Object)

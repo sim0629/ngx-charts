@@ -14,9 +14,11 @@ export declare class TooltipArea {
     showPercentage: boolean;
     tooltipDisabled: boolean;
     tooltipTemplate: TemplateRef<any>;
+    hiddenEntries: any[];
     hover: EventEmitter<{}>;
     tooltipAnchor: any;
     constructor(renderer: Renderer);
+    isHidden(entry: any): boolean;
     getValues(xVal: any): any[];
     mouseMove(event: any): void;
     findClosestPointIndex(xPos: any): number;

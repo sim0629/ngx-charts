@@ -17,6 +17,7 @@ export declare class LineChartComponent extends BaseChartComponent {
     showGridLines: boolean;
     curve: any;
     activeEntries: any[];
+    hiddenEntries: any[];
     schemeType: string;
     rangeFillOpacity: number;
     xAxisTickFormatting: any;
@@ -34,12 +35,15 @@ export declare class LineChartComponent extends BaseChartComponent {
     yScaleMax: number;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
+    hidden: EventEmitter<any>;
+    shown: EventEmitter<any>;
     tooltipTemplate: TemplateRef<any>;
     seriesTooltipTemplate: TemplateRef<any>;
     dims: ViewDimensions;
     xSet: any;
     xDomain: any;
     yDomain: any;
+    yLabelDomain: any;
     seriesDomain: any;
     yScale: any;
     xScale: any;
@@ -65,9 +69,12 @@ export declare class LineChartComponent extends BaseChartComponent {
     timelineTransform: any;
     timelinePadding: number;
     update(): void;
+    isHidden(entry: any): boolean;
+    toggleHidden(item: any): void;
     updateTimeline(): void;
+    getUniqueXDomainValues(results: any[], hidden?: boolean): any[];
     getXDomain(): any[];
-    getYDomain(): any[];
+    getYDomain(hidden: boolean): any[];
     getSeriesDomain(): any[];
     getXScale(domain: any, width: any): any;
     getYScale(domain: any, height: any): any;

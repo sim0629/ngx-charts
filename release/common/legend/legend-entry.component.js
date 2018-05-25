@@ -11,11 +11,16 @@ import { Component, Input, Output, ChangeDetectionStrategy, HostListener, EventE
 var LegendEntryComponent = /** @class */ (function () {
     function LegendEntryComponent() {
         this.isActive = false;
+        this.isHidden = false;
         this.select = new EventEmitter();
         this.activate = new EventEmitter();
         this.deactivate = new EventEmitter();
+        this.toggleHide = new EventEmitter();
         this.toggle = new EventEmitter();
     }
+    LegendEntryComponent.prototype.onToggleHide = function () {
+        this.toggleHide.emit({ name: this.label });
+    };
     Object.defineProperty(LegendEntryComponent.prototype, "trimmedLabel", {
         get: function () {
             return this.formattedLabel || '(empty)';
@@ -46,6 +51,10 @@ var LegendEntryComponent = /** @class */ (function () {
         __metadata("design:type", Boolean)
     ], LegendEntryComponent.prototype, "isActive", void 0);
     __decorate([
+        Input(),
+        __metadata("design:type", Boolean)
+    ], LegendEntryComponent.prototype, "isHidden", void 0);
+    __decorate([
         Output(),
         __metadata("design:type", EventEmitter)
     ], LegendEntryComponent.prototype, "select", void 0);
@@ -57,6 +66,10 @@ var LegendEntryComponent = /** @class */ (function () {
         Output(),
         __metadata("design:type", EventEmitter)
     ], LegendEntryComponent.prototype, "deactivate", void 0);
+    __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], LegendEntryComponent.prototype, "toggleHide", void 0);
     __decorate([
         Output(),
         __metadata("design:type", EventEmitter)
@@ -76,7 +89,7 @@ var LegendEntryComponent = /** @class */ (function () {
     LegendEntryComponent = __decorate([
         Component({
             selector: 'ngx-charts-legend-entry',
-            template: "\n    <span \n      [title]=\"formattedLabel\"\n      tabindex=\"-1\"\n      [class.active]=\"isActive\"\n      (click)=\"select.emit(formattedLabel)\">\n      <span\n        class=\"legend-label-color\"\n        [style.background-color]=\"color\"\n        (click)=\"toggle.emit(formattedLabel)\">\n      </span>\n      <span class=\"legend-label-text\">\n        {{trimmedLabel}}\n      </span>\n    </span>\n  ",
+            template: "\n    <span \n      [title]=\"formattedLabel\"\n      tabindex=\"-1\"\n      [class.active]=\"isActive\"\n      [class.hidden]=\"isHidden\"\n      (click)=\"select.emit(formattedLabel); onToggleHide();\">\n      <span\n        class=\"legend-label-color\"\n        [style.background-color]=\"color\"\n        (click)=\"toggle.emit(formattedLabel)\">\n      </span>\n      <span class=\"legend-label-text\">\n        {{trimmedLabel}}\n      </span>\n    </span>\n  ",
             changeDetection: ChangeDetectionStrategy.OnPush
         })
     ], LegendEntryComponent);

@@ -38,6 +38,8 @@
       transition: 0.2s; }
     .chart-legend .legend-label .active .legend-label-text {
       color: #000; }
+    .chart-legend .legend-label .hidden .legend-label-text {
+      text-decoration: line-through; }
   .chart-legend .legend-label-color {
     display: inline-block;
     height: 15px;

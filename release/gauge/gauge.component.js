@@ -36,9 +36,12 @@ var GaugeComponent = /** @class */ (function (_super) {
         _this.startAngle = -120;
         _this.angleSpan = 240;
         _this.activeEntries = [];
+        _this.hiddenEntries = [];
         _this.tooltipDisabled = false;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
+        _this.hidden = new EventEmitter();
+        _this.shown = new EventEmitter();
         _this.resizeScale = 1;
         _this.rotation = '';
         _this.textTransform = 'scale(1, 1)';
@@ -53,6 +56,7 @@ var GaugeComponent = /** @class */ (function (_super) {
     GaugeComponent.prototype.update = function () {
         var _this = this;
         _super.prototype.update.call(this);
+        this.visableResults = this.getVisableResults();
         if (!this.showAxis) {
             if (!this.margin) {
                 this.margin = [10, 20, 10, 20];
@@ -77,7 +81,7 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.domain = this.getDomain();
         this.valueDomain = this.getValueDomain();
         this.valueScale = this.getValueScale();
-        this.displayValue = this.getDisplayValue();
+        this.displayData = this.getCenterData();
         this.outerRadius = Math.min(this.dims.width, this.dims.height) / 2;
         this.arcs = this.getArcs();
         this.setColors();
@@ -88,15 +92,20 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.rotation = "rotate(" + this.startAngle + ")";
         setTimeout(function () { return _this.scaleText(); }, 50);
     };
+    GaugeComponent.prototype.getVisableResults = function () {
+        var _this = this;
+        return this.results.filter(function (item) { return !_this.isHidden(item); });
+        // return this.results.filter(res => res['show']);
+    };
     GaugeComponent.prototype.getArcs = function () {
         var arcs = [];
         var availableRadius = this.outerRadius * 0.7;
-        var radiusPerArc = Math.min(availableRadius / this.results.length, 10);
+        var radiusPerArc = Math.min(availableRadius / this.visableResults.length, 10);
         var arcWidth = radiusPerArc * 0.7;
-        this.textRadius = this.outerRadius - this.results.length * radiusPerArc;
+        this.textRadius = this.outerRadius - this.visableResults.length * radiusPerArc;
         this.cornerRadius = Math.floor(arcWidth / 2);
         var i = 0;
-        for (var _i = 0, _a = this.results; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this.visableResults; _i < _a.length; _i++) {
             var d = _a[_i];
             var outerRadius = this.outerRadius - (i * radiusPerArc);
             var innerRadius = outerRadius - arcWidth;
@@ -131,7 +140,7 @@ var GaugeComponent = /** @class */ (function (_super) {
         return this.results.map(function (d) { return d.name; });
     };
     GaugeComponent.prototype.getValueDomain = function () {
-        var values = this.results.map(function (d) { return d.value; });
+        var values = this.visableResults.map(function (d) { return d.value; });
         var dataMin = Math.min.apply(Math, values);
         var dataMax = Math.max.apply(Math, values);
         if (this.min !== undefined) {
@@ -154,28 +163,45 @@ var GaugeComponent = /** @class */ (function (_super) {
             .nice()
             .domain(this.valueDomain);
     };
-    GaugeComponent.prototype.getDisplayValue = function () {
-        var value = this.results.map(function (d) { return d.value; }).reduce(function (a, b) { return a + b; }, 0);
+    GaugeComponent.prototype.getCenterFormatting = function (val) {
         if (this.textValue && 0 !== this.textValue.length) {
             return this.textValue.toLocaleString();
         }
-        if (this.valueFormatting) {
-            return this.valueFormatting(value);
+        if (this.centerFormatting) {
+            return this.centerFormatting(val);
         }
-        return value.toLocaleString();
+        return val['name'] + ' ' + val['value'].toLocaleString();
+    };
+    GaugeComponent.prototype.getCenterData = function () {
+        if (this.centerData) {
+            return this.centerData(this.visableResults);
+        }
+        else {
+            return this.visableResults;
+        }
     };
     GaugeComponent.prototype.scaleText = function (repeat) {
         var _this = this;
         if (repeat === void 0) { repeat = true; }
-        var width = this.textEl.nativeElement.getBoundingClientRect().width;
+        var _a = this.textEl.nativeElement.getBoundingClientRect(), width = _a.width, height = _a.height;
         var oldScale = this.resizeScale;
+        var heightScale;
+        var widthScale;
         if (width === 0) {
-            this.resizeScale = 1;
+            widthScale = 1;
         }
         else {
-            var availableSpace = this.textRadius;
-            this.resizeScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
+            var availableSpace = this.textRadius * 1.5;
+            widthScale = Math.floor((availableSpace / (width / this.resizeScale)) * 100) / 100;
         }
+        if (height === 0) {
+            heightScale = 1;
+        }
+        else {
+            var availableSpace = this.textRadius * 1.5;
+            heightScale = Math.floor((availableSpace / (height / this.resizeScale)) * 100) / 100;
+        }
+        this.resizeScale = Math.min(widthScale, heightScale);
         if (this.resizeScale !== oldScale) {
             this.textTransform = "scale(" + this.resizeScale + ", " + this.resizeScale + ")";
             this.cd.markForCheck();
@@ -215,6 +241,29 @@ var GaugeComponent = /** @class */ (function (_super) {
         this.activeEntries.splice(idx, 1);
         this.activeEntries = this.activeEntries.slice();
         this.deactivate.emit({ value: item, entries: this.activeEntries });
+    };
+    GaugeComponent.prototype.toggleHidden = function (item) {
+        var idx = this.hiddenEntries.findIndex(function (d) {
+            return d.name === item.name;
+        });
+        if (idx > -1) {
+            this.hiddenEntries.splice(idx, 1);
+            this.hiddenEntries = this.hiddenEntries.slice();
+            this.shown.emit({ value: item, entries: this.hiddenEntries });
+        }
+        else {
+            this.hiddenEntries = [item].concat(this.hiddenEntries);
+            this.hidden.emit({ value: item, entries: this.hiddenEntries });
+        }
+        this.update();
+    };
+    GaugeComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries)
+            return false;
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
     };
     GaugeComponent.prototype.isActive = function (entry) {
         if (!this.activeEntries)
@@ -281,6 +330,10 @@ var GaugeComponent = /** @class */ (function (_super) {
     ], GaugeComponent.prototype, "activeEntries", void 0);
     __decorate([
         Input(),
+        __metadata("design:type", Array)
+    ], GaugeComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Input(),
         __metadata("design:type", Object)
     ], GaugeComponent.prototype, "axisTickFormatting", void 0);
     __decorate([
@@ -291,6 +344,14 @@ var GaugeComponent = /** @class */ (function (_super) {
         Input(),
         __metadata("design:type", Function)
     ], GaugeComponent.prototype, "valueFormatting", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Function)
+    ], GaugeComponent.prototype, "centerFormatting", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Function)
+    ], GaugeComponent.prototype, "centerData", void 0);
     __decorate([
         Input(),
         __metadata("design:type", Array)
@@ -304,6 +365,14 @@ var GaugeComponent = /** @class */ (function (_super) {
         __metadata("design:type", EventEmitter)
     ], GaugeComponent.prototype, "deactivate", void 0);
     __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], GaugeComponent.prototype, "hidden", void 0);
+    __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], GaugeComponent.prototype, "shown", void 0);
+    __decorate([
         ContentChild('tooltipTemplate'),
         __metadata("design:type", TemplateRef)
     ], GaugeComponent.prototype, "tooltipTemplate", void 0);
@@ -314,7 +383,7 @@ var GaugeComponent = /** @class */ (function (_super) {
     GaugeComponent = __decorate([
         Component({
             selector: 'ngx-charts-gauge',
-            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\">\n      <svg:g [attr.transform]=\"transform\" class=\"gauge chart\">\n        <svg:g *ngFor=\"let arc of arcs; trackBy:trackBy\" [attr.transform]=\"rotation\">\n          <svg:g ngx-charts-gauge-arc\n            [backgroundArc]=\"arc.backgroundArc\"\n            [valueArc]=\"arc.valueArc\"\n            [cornerRadius]=\"cornerRadius\"\n            [colors]=\"colors\"\n            [isActive]=\"isActive(arc.valueArc.data)\"\n            [tooltipDisabled]=\"tooltipDisabled\"\n            [tooltipTemplate]=\"tooltipTemplate\"\n            [valueFormatting]=\"valueFormatting\"\n            [animations]=\"animations\"\n            (select)=\"onClick($event)\"\n            (activate)=\"onActivate($event)\"\n            (deactivate)=\"onDeactivate($event)\">\n          </svg:g>\n        </svg:g>\n\n        <svg:g ngx-charts-gauge-axis\n          *ngIf=\"showAxis\"\n          [bigSegments]=\"bigSegments\"\n          [smallSegments]=\"smallSegments\"\n          [min]=\"min\"\n          [max]=\"max\"\n          [radius]=\"outerRadius\"\n          [angleSpan]=\"angleSpan\"\n          [valueScale]=\"valueScale\"\n          [startAngle]=\"startAngle\"\n          [tickFormatting]=\"axisTickFormatting\">\n        </svg:g>\n\n        <svg:text #textEl\n            [style.textAnchor]=\"'middle'\"\n            [attr.transform]=\"textTransform\"\n            alignment-baseline=\"central\">\n          <tspan x=\"0\" dy=\"0\">{{displayValue}}</tspan>\n          <tspan x=\"0\" dy=\"1.2em\">{{units}}</tspan>\n        </svg:text>\n\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [hiddenEntries]=\"hiddenEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelToggleHide)=\"toggleHidden($event)\">\n      <svg:g [attr.transform]=\"transform\" class=\"gauge chart\">\n        <svg:g *ngFor=\"let arc of arcs; trackBy:trackBy\" [attr.transform]=\"rotation\">\n          <svg:g ngx-charts-gauge-arc\n            [backgroundArc]=\"arc.backgroundArc\"\n            [valueArc]=\"arc.valueArc\"\n            [cornerRadius]=\"cornerRadius\"\n            [colors]=\"colors\"\n            [isActive]=\"isActive(arc.valueArc.data)\"\n            [tooltipDisabled]=\"tooltipDisabled\"\n            [tooltipTemplate]=\"tooltipTemplate\"\n            [valueFormatting]=\"valueFormatting\"\n            [animations]=\"animations\"\n            (select)=\"onClick($event)\"\n            (activate)=\"onActivate($event)\"\n            (deactivate)=\"onDeactivate($event)\">\n          </svg:g>\n        </svg:g>\n\n        <svg:g ngx-charts-gauge-axis\n          *ngIf=\"showAxis\"\n          [bigSegments]=\"bigSegments\"\n          [smallSegments]=\"smallSegments\"\n          [min]=\"min\"\n          [max]=\"max\"\n          [radius]=\"outerRadius\"\n          [angleSpan]=\"angleSpan\"\n          [valueScale]=\"valueScale\"\n          [startAngle]=\"startAngle\"\n          [tickFormatting]=\"axisTickFormatting\">\n        </svg:g>\n\n        <svg:text #textEl\n            [style.textAnchor]=\"'middle'\"\n            [attr.transform]=\"textTransform\"\n            alignment-baseline=\"central\">\n          <tspan x=\"0\" [attr.dy]=\"i > 0 ? '1.2em' : '0em'\"\n            *ngFor=\"let val of displayData; let i = index\">{{getCenterFormatting(val)}}</tspan>\n          <tspan x=\"0\" dy=\"1.2em\">{{units}}</tspan>\n        </svg:text>\n\n      </svg:g>\n    </ngx-charts-chart>\n  ",
             styleUrls: [
                 '../common/base-chart.component.css',
                 './gauge.component.css'
