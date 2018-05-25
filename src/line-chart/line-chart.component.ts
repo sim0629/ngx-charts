@@ -22,7 +22,7 @@ import { calculateViewDimensions, ViewDimensions } from '../common/view-dimensio
 import { ColorHelper } from '../common/color.helper';
 import { BaseChartComponent } from '../common/base-chart.component';
 import { id } from '../utils/id';
-import { getUniqueXDomainValues } from '../common/domain.helper';
+// import { getUniqueXDomainValues } from '../common/domain.helper';
 
 @Component({
   selector: 'ngx-charts-line-chart',
@@ -73,19 +73,21 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
           (dimensionsChanged)="updateYAxisWidth($event)">
         </svg:g>
         <svg:g [attr.clip-path]="clipPath">
-          <svg:g *ngFor="let series of visableResults; trackBy:trackBy" [@animationState]="'active'">
-            <svg:g ngx-charts-line-series
-              [xScale]="xScale"
-              [yScale]="yScale"
-              [colors]="colors"
-              [data]="series"
-              [activeEntries]="activeEntries"
-              [scaleType]="scaleType"
-              [curve]="curve"
-              [rangeFillOpacity]="rangeFillOpacity"
-              [hasRange]="hasRange"
-              [animations]="animations"
-            />
+          <svg:g *ngFor="let series of results; trackBy:trackBy" [@animationState]="'active'">
+            <svg:g *ngIf="!isHidden(series)">
+              <svg:g ngx-charts-line-series
+                [xScale]="xScale"
+                [yScale]="yScale"
+                [colors]="colors"
+                [data]="series"
+                [activeEntries]="activeEntries"
+                [scaleType]="scaleType"
+                [curve]="curve"
+                [rangeFillOpacity]="rangeFillOpacity"
+                [hasRange]="hasRange"
+                [animations]="animations"
+              />
+            </svg:g>
           </svg:g>
 
           <svg:g *ngIf="!tooltipDisabled" (mouseleave)="hideCircles()">
@@ -94,28 +96,31 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
               [xSet]="xSet"
               [xScale]="xScale"
               [yScale]="yScale"
-              [results]="visableResults"
+              [results]="results"
               [colors]="colors"
+              [hiddenEntries]="hiddenEntries"
               [tooltipDisabled]="tooltipDisabled"
               [tooltipTemplate]="seriesTooltipTemplate"
               (hover)="updateHoveredVertical($event)"
             />
 
-            <svg:g *ngFor="let series of visableResults">
-              <svg:g ngx-charts-circle-series
-                [xScale]="xScale"
-                [yScale]="yScale"
-                [colors]="colors"
-                [data]="series"
-                [scaleType]="scaleType"
-                [visibleValue]="hoveredVertical"
-                [activeEntries]="activeEntries"
-                [tooltipDisabled]="tooltipDisabled"
-                [tooltipTemplate]="tooltipTemplate"
-                (select)="onClick($event, series)"
-                (activate)="onActivate($event)"
-                (deactivate)="onDeactivate($event)"
-              />
+            <svg:g *ngFor="let series of results">
+              <svg:g *ngIf="!isHidden(series)">
+                <svg:g ngx-charts-circle-series
+                  [xScale]="xScale"
+                  [yScale]="yScale"
+                  [colors]="colors"
+                  [data]="series"
+                  [scaleType]="scaleType"
+                  [visibleValue]="hoveredVertical"
+                  [activeEntries]="activeEntries"
+                  [tooltipDisabled]="tooltipDisabled"
+                  [tooltipTemplate]="tooltipTemplate"
+                  (select)="onClick($event, series)"
+                  (activate)="onActivate($event)"
+                  (deactivate)="onDeactivate($event)"
+                />
+              </svg:g>
             </svg:g>
           </svg:g>
         </svg:g>
@@ -123,25 +128,28 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
       <svg:g ngx-charts-timeline
         *ngIf="timeline && scaleType != 'ordinal'"
         [attr.transform]="timelineTransform"
-        [results]="visableResults"
+        [results]="results"
         [view]="[timelineWidth, height]"
         [height]="timelineHeight"
         [scheme]="scheme"
         [customColors]="customColors"
         [scaleType]="scaleType"
         [legend]="legend"
+        [hiddenEntries]="hiddenEntries"
         (onDomainChange)="updateDomain($event)">
-        <svg:g *ngFor="let series of visableResults; trackBy:trackBy">
-          <svg:g ngx-charts-line-series
-            [xScale]="timelineXScale"
-            [yScale]="timelineYScale"
-            [colors]="colors"
-            [data]="series"
-            [scaleType]="scaleType"
-            [curve]="curve"
-            [hasRange]="hasRange"
-            [animations]="animations"
-          />
+        <svg:g *ngFor="let series of results; trackBy:trackBy">
+          <svg:g *ngIf="!isHidden(series)">
+            <svg:g ngx-charts-line-series
+              [xScale]="timelineXScale"
+              [yScale]="timelineYScale"
+              [colors]="colors"
+              [data]="series"
+              [scaleType]="scaleType"
+              [curve]="curve"
+              [hasRange]="hasRange"
+              [animations]="animations"
+            />
+          </svg:g>
         </svg:g>
       </svg:g>
     </ngx-charts-chart>
@@ -232,11 +240,9 @@ export class LineChartComponent extends BaseChartComponent {
   timelineXDomain: any;
   timelineTransform: any;
   timelinePadding: number = 10;
-  visableResults: any;
 
   update(): void {
     super.update();
-    this.visableResults = this.getVisableResults();
 
     this.dims = calculateViewDimensions({
       width: this.width,
@@ -261,8 +267,8 @@ export class LineChartComponent extends BaseChartComponent {
       this.xDomain = this.filteredDomain;
     }
 
-    this.yDomain = this.getYDomain(this.visableResults);
-    this.yLabelDomain = this.getYDomain(this.results);
+    this.yDomain = this.getYDomain(true);
+    this.yLabelDomain = this.getYDomain(false);
     this.seriesDomain = this.getSeriesDomain();
 
     this.xScale = this.getXScale(this.xDomain, this.dims.width);
@@ -279,13 +285,10 @@ export class LineChartComponent extends BaseChartComponent {
     this.clipPath = `url(#${this.clipPathId})`;
   }
 
-  getVisableResults(): any {
-    return this.results.filter(item => { return !this.isHidden(item); });
-    // return this.results.filter(res => res['show']);
-  }
-
   isHidden(entry): boolean {
-    if(!this.hiddenEntries) return false;
+    if(!this.hiddenEntries) {
+      return false;
+    }
     const item = this.hiddenEntries.find(d => {
       return entry.name === d.name;
     });
@@ -298,12 +301,12 @@ export class LineChartComponent extends BaseChartComponent {
     });
 
     if (idx > -1) {
-      console.log(`show ${item.name}`);
+      // console.log(`show ${item.name}`);
       this.hiddenEntries.splice(idx, 1);
       this.hiddenEntries = [...this.hiddenEntries];
       this.shown.emit({ value: item, entries: this.hiddenEntries });
     } else {
-      console.log(`hide ${item.name}`);
+      // console.log(`hide ${item.name}`);
       this.hiddenEntries = [ item, ...this.hiddenEntries ];
       this.hidden.emit({ value: item, entries: this.hiddenEntries });
     }
@@ -321,8 +324,21 @@ export class LineChartComponent extends BaseChartComponent {
     }
   }
 
+  getUniqueXDomainValues(results: any[], hidden: boolean = true): any[] {
+    const valueSet = new Set();
+    for (const result of results) {
+      if (this.isHidden({ name: result.name }) && hidden) {
+        continue;
+      }
+      for (const d of result.series) {
+        valueSet.add(d.name);
+      }
+    }
+    return Array.from(valueSet);
+  }
+
   getXDomain(): any[] {
-    let values = getUniqueXDomainValues(this.visableResults);
+    let values = this.getUniqueXDomainValues(this.results);
 
     this.scaleType = this.getScaleType(values);
     let domain = [];
@@ -364,9 +380,12 @@ export class LineChartComponent extends BaseChartComponent {
     return domain;
   }
 
-  getYDomain(source: any): any[] {
+  getYDomain(hidden: boolean): any[] {
     const domain = [];
-    for (const results of source) {
+    for (const results of this.results) {
+      if (this.isHidden({ name: results.name }) && hidden) {
+        continue;
+      }
       for (const d of results.series) {
         if (domain.indexOf(d.value) < 0) {
           domain.push(d.value);

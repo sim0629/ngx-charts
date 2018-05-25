@@ -96,17 +96,34 @@ export class TooltipArea {
   @Input() showPercentage: boolean = false;
   @Input() tooltipDisabled: boolean = false;
   @Input() tooltipTemplate: TemplateRef<any>;
-
+  @Input() hiddenEntries: any[];
+  
   @Output() hover = new EventEmitter();
 
   @ViewChild('tooltipAnchor') tooltipAnchor;
 
   constructor(private renderer: Renderer) { }
 
+  isHidden(entry): boolean {
+
+    if(!this.hiddenEntries) {
+      return false;
+    }
+    const item = this.hiddenEntries.find(d => {
+      return entry.name === d.name;
+    });
+
+    return item !== undefined;
+  }
+
   getValues(xVal): any[] {
     const results = [];
 
     for (const group of this.results) {
+      if (this.isHidden({ name: group.name })) {
+        continue;
+      }
+
       const item = group.series.find(d => d.name.toString() === xVal.toString());
       let groupName = group.name;
       if (groupName instanceof Date) {

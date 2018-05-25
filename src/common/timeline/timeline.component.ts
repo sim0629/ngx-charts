@@ -48,6 +48,7 @@ export class Timeline implements OnChanges {
   @Input() autoScale;
   @Input() scaleType;
   @Input() height: number = 50;
+  @Input() hiddenEntries: any[];
 
   @Output() select = new EventEmitter();
   @Output() onDomainChange = new EventEmitter();
@@ -77,6 +78,18 @@ export class Timeline implements OnChanges {
     }
   }
 
+  isHidden(entry): boolean {
+
+    if(!this.hiddenEntries) {
+      return false;
+    }
+    const item = this.hiddenEntries.find(d => {
+      return entry.name === d.name;
+    });
+
+    return item !== undefined;
+  }
+
   update(): void {
     this.dims = this.getDims();
     this.height = this.dims.height;
@@ -101,6 +114,9 @@ export class Timeline implements OnChanges {
     let values = [];
 
     for (const results of this.results) {
+      if (this.isHidden({ name: results.name })) {
+        continue;
+      }
       for (const d of results.series) {
         if (!values.includes(d.name)) {
           values.push(d.name);

@@ -282,7 +282,6 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
   }
 
   getCenterData(): any {
-    console.log(this.visableResults);
     if (this.centerData) {
       return this.centerData(this.visableResults);
     } else {
@@ -366,12 +365,10 @@ export class GaugeComponent extends BaseChartComponent implements AfterViewInit 
     });
 
     if (idx > -1) {
-      console.log(`show ${item.name}`);
       this.hiddenEntries.splice(idx, 1);
       this.hiddenEntries = [...this.hiddenEntries];
       this.shown.emit({ value: item, entries: this.hiddenEntries });
     } else {
-      console.log(`hide ${item.name}`);
       this.hiddenEntries = [ item, ...this.hiddenEntries ];
       this.hidden.emit({ value: item, entries: this.hiddenEntries });
     }
