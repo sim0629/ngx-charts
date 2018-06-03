@@ -236,7 +236,7 @@ export class TooltipArea {
     }
     result += ': ';
     if (tooltipItem.value !== undefined) {
-      result += tooltipItem.value.toLocaleString();
+      result += tooltipItem.value.toLocaleString(undefined, { maximumFractionDigits: 8 });
     }
     if (tooltipItem.min !== undefined || tooltipItem.max !== undefined) {
       result += ' (';
@@ -244,7 +244,7 @@ export class TooltipArea {
         if (tooltipItem.max === undefined) {
           result += '≥';
         }
-        result += tooltipItem.min.toLocaleString();
+        result += tooltipItem.min.toLocaleString(undefined, { maximumFractionDigits: 8 });
         if (tooltipItem.max !== undefined) {
           result += ' - ';
         }
@@ -252,7 +252,7 @@ export class TooltipArea {
         result += '≤';
       }
       if (tooltipItem.max !== undefined) {
-        result += tooltipItem.max.toLocaleString();
+        result += tooltipItem.max.toLocaleString(undefined, { maximumFractionDigits: 8 });
       }
       result += ')';
     }

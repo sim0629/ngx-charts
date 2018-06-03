@@ -185,7 +185,7 @@ export class CircleSeriesComponent implements OnChanges, OnInit {
   getTooltipText({ tooltipLabel, value, seriesName, min, max}): string {
     return `
       <span class="tooltip-label">${seriesName} • ${tooltipLabel}</span>
-      <span class="tooltip-val">${value.toLocaleString()}${this.getTooltipMinMaxText(min, max)}</span>
+      <span class="tooltip-val">${value.toLocaleString(undefined, { maximumFractionDigits: 8 })}${this.getTooltipMinMaxText(min, max)}</span>
     `;
   }
 
@@ -196,7 +196,7 @@ export class CircleSeriesComponent implements OnChanges, OnInit {
         if (max === undefined) {
           result += '≥';
         }
-        result += min.toLocaleString();
+        result += min.toLocaleString(undefined, { maximumFractionDigits: 8 });
         if (max !== undefined) {
           result += ' - ';
         }
@@ -204,7 +204,7 @@ export class CircleSeriesComponent implements OnChanges, OnInit {
         result += '≤';
       }
       if (max !== undefined) {
-        result += max.toLocaleString();
+        result += max.toLocaleString(undefined, { maximumFractionDigits: 8 });
       }
       result += ')';
       return result;
