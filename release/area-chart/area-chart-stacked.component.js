@@ -24,7 +24,7 @@ import { calculateViewDimensions } from '../common/view-dimensions.helper';
 import { ColorHelper } from '../common/color.helper';
 import { BaseChartComponent } from '../common/base-chart.component';
 import { id } from '../utils/id';
-import { getUniqueXDomainValues } from '../common/domain.helper';
+//import { getUniqueXDomainValues } from '../common/domain.helper';
 var AreaChartStackedComponent = /** @class */ (function (_super) {
     __extends(AreaChartStackedComponent, _super);
     function AreaChartStackedComponent() {
@@ -34,10 +34,13 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
         _this.showGridLines = true;
         _this.curve = curveLinear;
         _this.activeEntries = [];
+        _this.hiddenEntries = [];
         _this.roundDomains = false;
         _this.tooltipDisabled = false;
         _this.activate = new EventEmitter();
         _this.deactivate = new EventEmitter();
+        _this.hidden = new EventEmitter();
+        _this.shown = new EventEmitter();
         _this.margin = [10, 20, 10, 20];
         _this.xAxisHeight = 0;
         _this.yAxisWidth = 0;
@@ -68,7 +71,8 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
         if (this.filteredDomain) {
             this.xDomain = this.filteredDomain;
         }
-        this.yDomain = this.getYDomain();
+        this.yDomain = this.getYDomain(true);
+        this.yLabelDomain = this.getYDomain(false);
         this.seriesDomain = this.getSeriesDomain();
         this.xScale = this.getXScale(this.xDomain, this.dims.width);
         this.yScale = this.getYScale(this.yDomain, this.dims.height);
@@ -77,6 +81,9 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
             var d0 = 0;
             for (var _i = 0, _a = this_1.results; _i < _a.length; _i++) {
                 var group = _a[_i];
+                if (this_1.isHidden({ name: group.name })) {
+                    continue;
+                }
                 var d = group.series.find(function (item) {
                     var a = item.name;
                     var b = val;
@@ -113,6 +120,30 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
         this.clipPathId = 'clip' + id().toString();
         this.clipPath = "url(#" + this.clipPathId + ")";
     };
+    AreaChartStackedComponent.prototype.isHidden = function (entry) {
+        if (!this.hiddenEntries) {
+            return false;
+        }
+        var item = this.hiddenEntries.find(function (d) {
+            return entry.name === d.name;
+        });
+        return item !== undefined;
+    };
+    AreaChartStackedComponent.prototype.toggleHidden = function (item) {
+        var idx = this.hiddenEntries.findIndex(function (d) {
+            return d.name === item.name;
+        });
+        if (idx > -1) {
+            this.hiddenEntries.splice(idx, 1);
+            this.hiddenEntries = this.hiddenEntries.slice();
+            this.shown.emit({ value: item, entries: this.hiddenEntries });
+        }
+        else {
+            this.hiddenEntries = [item].concat(this.hiddenEntries);
+            this.hidden.emit({ value: item, entries: this.hiddenEntries });
+        }
+        this.update();
+    };
     AreaChartStackedComponent.prototype.updateTimeline = function () {
         if (this.timeline) {
             this.timelineWidth = this.dims.width;
@@ -122,8 +153,23 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
             this.timelineTransform = "translate(" + this.dims.xOffset + ", " + -this.margin[2] + ")";
         }
     };
+    AreaChartStackedComponent.prototype.getUniqueXDomainValues = function (results, hidden) {
+        if (hidden === void 0) { hidden = true; }
+        var valueSet = new Set();
+        for (var _i = 0, results_1 = results; _i < results_1.length; _i++) {
+            var result = results_1[_i];
+            if (this.isHidden({ name: result.name }) && hidden) {
+                continue;
+            }
+            for (var _a = 0, _b = result.series; _a < _b.length; _a++) {
+                var d = _b[_a];
+                valueSet.add(d.name);
+            }
+        }
+        return Array.from(valueSet);
+    };
     AreaChartStackedComponent.prototype.getXDomain = function () {
-        var values = getUniqueXDomainValues(this.results);
+        var values = this.getUniqueXDomainValues(this.results);
         this.scaleType = this.getScaleType(values);
         var domain = [];
         if (this.scaleType === 'linear') {
@@ -162,7 +208,7 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
         }
         return domain;
     };
-    AreaChartStackedComponent.prototype.getYDomain = function () {
+    AreaChartStackedComponent.prototype.getYDomain = function (hidden) {
         var _this = this;
         var domain = [];
         var _loop_2 = function (i) {
@@ -170,6 +216,9 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
             var sum = 0;
             for (var _i = 0, _a = this_2.results; _i < _a.length; _i++) {
                 var group = _a[_i];
+                if (this_2.isHidden({ name: group.name }) && hidden) {
+                    continue;
+                }
                 var d = group.series.find(function (item) {
                     var a = item.name;
                     var b = val;
@@ -277,7 +326,7 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
             domain = this.seriesDomain;
         }
         else {
-            domain = this.yDomain;
+            domain = this.yLabelDomain;
         }
         this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
     };
@@ -294,7 +343,7 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
             opts.title = this.legendTitle;
         }
         else {
-            opts.domain = this.yDomain;
+            opts.domain = this.yLabelDomain;
             opts.colors = this.colors.scale;
         }
         return opts;
@@ -389,6 +438,10 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
     ], AreaChartStackedComponent.prototype, "activeEntries", void 0);
     __decorate([
         Input(),
+        __metadata("design:type", Array)
+    ], AreaChartStackedComponent.prototype, "hiddenEntries", void 0);
+    __decorate([
+        Input(),
         __metadata("design:type", String)
     ], AreaChartStackedComponent.prototype, "schemeType", void 0);
     __decorate([
@@ -440,6 +493,14 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
         __metadata("design:type", EventEmitter)
     ], AreaChartStackedComponent.prototype, "deactivate", void 0);
     __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], AreaChartStackedComponent.prototype, "hidden", void 0);
+    __decorate([
+        Output(),
+        __metadata("design:type", EventEmitter)
+    ], AreaChartStackedComponent.prototype, "shown", void 0);
+    __decorate([
         ContentChild('tooltipTemplate'),
         __metadata("design:type", TemplateRef)
     ], AreaChartStackedComponent.prototype, "tooltipTemplate", void 0);
@@ -456,7 +517,7 @@ var AreaChartStackedComponent = /** @class */ (function (_super) {
     AreaChartStackedComponent = __decorate([
         Component({
             selector: 'ngx-charts-area-chart-stacked',
-            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\">\n      <svg:defs>\n        <svg:clipPath [attr.id]=\"clipPathId\">\n          <svg:rect\n            [attr.width]=\"dims.width + 10\"\n            [attr.height]=\"dims.height + 10\"\n            [attr.transform]=\"'translate(-5, -5)'\"/>\n        </svg:clipPath>\n      </svg:defs>\n      <svg:g [attr.transform]=\"transform\" class=\"area-chart chart\">\n        <svg:g ngx-charts-x-axis\n          *ngIf=\"xAxis\"\n          [xScale]=\"xScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showXAxisLabel\"\n          [labelText]=\"xAxisLabel\"\n          [tickFormatting]=\"xAxisTickFormatting\"\n          [ticks]=\"xAxisTicks\"\n          (dimensionsChanged)=\"updateXAxisHeight($event)\">\n        </svg:g>\n        <svg:g ngx-charts-y-axis\n          *ngIf=\"yAxis\"\n          [yScale]=\"yScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showYAxisLabel\"\n          [labelText]=\"yAxisLabel\"\n          [tickFormatting]=\"yAxisTickFormatting\"\n          [ticks]=\"yAxisTicks\"\n          (dimensionsChanged)=\"updateYAxisWidth($event)\">\n        </svg:g>\n        <svg:g [attr.clip-path]=\"clipPath\">\n          <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n            <svg:g ngx-charts-area-series\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [colors]=\"colors\"\n              [data]=\"series\"\n              [scaleType]=\"scaleType\"\n              [gradient]=\"gradient\"\n              [activeEntries]=\"activeEntries\"\n              stacked=\"true\"\n              [curve]=\"curve\"\n              [animations]=\"animations\"\n            />\n          </svg:g>\n\n          <svg:g *ngIf=\"!tooltipDisabled\" (mouseleave)=\"hideCircles()\">\n            <svg:g ngx-charts-tooltip-area\n              [dims]=\"dims\"\n              [xSet]=\"xSet\"\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [results]=\"results\"\n              [colors]=\"colors\"\n              [tooltipDisabled]=\"tooltipDisabled\"\n              [tooltipTemplate]=\"seriesTooltipTemplate\"\n              (hover)=\"updateHoveredVertical($event)\"\n            />\n\n            <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n              <svg:g ngx-charts-circle-series\n                type=\"stacked\"\n                [xScale]=\"xScale\"\n                [yScale]=\"yScale\"\n                [colors]=\"colors\"\n                [activeEntries]=\"activeEntries\"\n                [data]=\"series\"\n                [scaleType]=\"scaleType\"\n                [visibleValue]=\"hoveredVertical\"\n                [tooltipDisabled]=\"tooltipDisabled\"\n                [tooltipTemplate]=\"tooltipTemplate\"\n                (select)=\"onClick($event, series)\"\n                (activate)=\"onActivate($event)\"\n                (deactivate)=\"onDeactivate($event)\"\n              />\n            </svg:g>\n          </svg:g>\n        </svg:g>\n      </svg:g>\n      <svg:g ngx-charts-timeline\n        *ngIf=\"timeline && scaleType != 'ordinal'\"\n        [attr.transform]=\"timelineTransform\"\n        [results]=\"results\"\n        [view]=\"[timelineWidth, height]\"\n        [height]=\"timelineHeight\"\n        [scheme]=\"scheme\"\n        [customColors]=\"customColors\"\n        [legend]=\"legend\"\n        [scaleType]=\"scaleType\"\n        (onDomainChange)=\"updateDomain($event)\">\n        <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n          <svg:g ngx-charts-area-series\n            [xScale]=\"timelineXScale\"\n            [yScale]=\"timelineYScale\"\n            [colors]=\"colors\"\n            [data]=\"series\"\n            [scaleType]=\"scaleType\"\n            [gradient]=\"gradient\"\n            stacked=\"true\"\n            [curve]=\"curve\"\n            [animations]=\"animations\"\n          />\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
+            template: "\n    <ngx-charts-chart\n      [view]=\"[width, height]\"\n      [showLegend]=\"legend\"\n      [legendOptions]=\"legendOptions\"\n      [activeEntries]=\"activeEntries\"\n      [hiddenEntries]=\"hiddenEntries\"\n      [animations]=\"animations\"\n      (legendLabelClick)=\"onClick($event)\"\n      (legendLabelActivate)=\"onActivate($event)\"\n      (legendLabelDeactivate)=\"onDeactivate($event)\"\n      (legendLabelToggleHide)=\"toggleHidden($event)\">\n      <svg:defs>\n        <svg:clipPath [attr.id]=\"clipPathId\">\n          <svg:rect\n            [attr.width]=\"dims.width + 10\"\n            [attr.height]=\"dims.height + 10\"\n            [attr.transform]=\"'translate(-5, -5)'\"/>\n        </svg:clipPath>\n      </svg:defs>\n      <svg:g [attr.transform]=\"transform\" class=\"area-chart chart\">\n        <svg:g ngx-charts-x-axis\n          *ngIf=\"xAxis\"\n          [xScale]=\"xScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showXAxisLabel\"\n          [labelText]=\"xAxisLabel\"\n          [tickFormatting]=\"xAxisTickFormatting\"\n          [ticks]=\"xAxisTicks\"\n          (dimensionsChanged)=\"updateXAxisHeight($event)\">\n        </svg:g>\n        <svg:g ngx-charts-y-axis\n          *ngIf=\"yAxis\"\n          [yScale]=\"yScale\"\n          [dims]=\"dims\"\n          [showGridLines]=\"showGridLines\"\n          [showLabel]=\"showYAxisLabel\"\n          [labelText]=\"yAxisLabel\"\n          [tickFormatting]=\"yAxisTickFormatting\"\n          [ticks]=\"yAxisTicks\"\n          (dimensionsChanged)=\"updateYAxisWidth($event)\">\n        </svg:g>\n        <svg:g [attr.clip-path]=\"clipPath\">\n          <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n            <svg:g ngx-charts-area-series\n              *ngIf=\"!isHidden(series)\"\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [colors]=\"colors\"\n              [data]=\"series\"\n              [scaleType]=\"scaleType\"\n              [gradient]=\"gradient\"\n              [activeEntries]=\"activeEntries\"\n              stacked=\"true\"\n              [curve]=\"curve\"\n              [animations]=\"animations\"\n            />\n          </svg:g>\n\n          <svg:g *ngIf=\"!tooltipDisabled\" (mouseleave)=\"hideCircles()\">\n            <svg:g ngx-charts-tooltip-area\n              [dims]=\"dims\"\n              [xSet]=\"xSet\"\n              [xScale]=\"xScale\"\n              [yScale]=\"yScale\"\n              [results]=\"results\"\n              [colors]=\"colors\"\n              [hiddenEntries]=\"hiddenEntries\"\n              [tooltipDisabled]=\"tooltipDisabled\"\n              [tooltipTemplate]=\"seriesTooltipTemplate\"\n              (hover)=\"updateHoveredVertical($event)\"\n            />\n\n            <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n              <svg:g ngx-charts-circle-series\n                *ngIf=\"!isHidden(series)\"\n                type=\"stacked\"\n                [xScale]=\"xScale\"\n                [yScale]=\"yScale\"\n                [colors]=\"colors\"\n                [activeEntries]=\"activeEntries\"\n                [data]=\"series\"\n                [scaleType]=\"scaleType\"\n                [visibleValue]=\"hoveredVertical\"\n                [tooltipDisabled]=\"tooltipDisabled\"\n                [tooltipTemplate]=\"tooltipTemplate\"\n                (select)=\"onClick($event, series)\"\n                (activate)=\"onActivate($event)\"\n                (deactivate)=\"onDeactivate($event)\"\n              />\n            </svg:g>\n          </svg:g>\n        </svg:g>\n      </svg:g>\n      <svg:g ngx-charts-timeline\n        *ngIf=\"timeline && scaleType != 'ordinal'\"\n        [attr.transform]=\"timelineTransform\"\n        [results]=\"results\"\n        [view]=\"[timelineWidth, height]\"\n        [height]=\"timelineHeight\"\n        [scheme]=\"scheme\"\n        [customColors]=\"customColors\"\n        [legend]=\"legend\"\n        [scaleType]=\"scaleType\"\n        [hiddenEntries]=\"hiddenEntries\"\n        (onDomainChange)=\"updateDomain($event)\">\n        <svg:g *ngFor=\"let series of results; trackBy:trackBy\">\n          <svg:g ngx-charts-area-series\n            *ngIf=\"!isHidden(series)\"\n            [xScale]=\"timelineXScale\"\n            [yScale]=\"timelineYScale\"\n            [colors]=\"colors\"\n            [data]=\"series\"\n            [scaleType]=\"scaleType\"\n            [gradient]=\"gradient\"\n            stacked=\"true\"\n            [curve]=\"curve\"\n            [animations]=\"animations\"\n          />\n        </svg:g>\n      </svg:g>\n    </ngx-charts-chart>\n  ",
             changeDetection: ChangeDetectionStrategy.OnPush,
             styleUrls: ['../common/base-chart.component.css'],
             encapsulation: ViewEncapsulation.None

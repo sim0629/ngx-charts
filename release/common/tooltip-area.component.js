@@ -135,7 +135,7 @@ var TooltipArea = /** @class */ (function () {
         }
         result += ': ';
         if (tooltipItem.value !== undefined) {
-            result += tooltipItem.value.toLocaleString();
+            result += tooltipItem.value.toLocaleString(undefined, { maximumFractionDigits: 8 });
         }
         if (tooltipItem.min !== undefined || tooltipItem.max !== undefined) {
             result += ' (';
@@ -143,7 +143,7 @@ var TooltipArea = /** @class */ (function () {
                 if (tooltipItem.max === undefined) {
                     result += '≥';
                 }
-                result += tooltipItem.min.toLocaleString();
+                result += tooltipItem.min.toLocaleString(undefined, { maximumFractionDigits: 8 });
                 if (tooltipItem.max !== undefined) {
                     result += ' - ';
                 }
@@ -152,7 +152,7 @@ var TooltipArea = /** @class */ (function () {
                 result += '≤';
             }
             if (tooltipItem.max !== undefined) {
-                result += tooltipItem.max.toLocaleString();
+                result += tooltipItem.max.toLocaleString(undefined, { maximumFractionDigits: 8 });
             }
             result += ')';
         }

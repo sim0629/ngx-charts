@@ -99,7 +99,7 @@ var CircleSeriesComponent = /** @class */ (function () {
     };
     CircleSeriesComponent.prototype.getTooltipText = function (_a) {
         var tooltipLabel = _a.tooltipLabel, value = _a.value, seriesName = _a.seriesName, min = _a.min, max = _a.max;
-        return "\n      <span class=\"tooltip-label\">" + seriesName + " \u2022 " + tooltipLabel + "</span>\n      <span class=\"tooltip-val\">" + value.toLocaleString() + this.getTooltipMinMaxText(min, max) + "</span>\n    ";
+        return "\n      <span class=\"tooltip-label\">" + seriesName + " \u2022 " + tooltipLabel + "</span>\n      <span class=\"tooltip-val\">" + value.toLocaleString(undefined, { maximumFractionDigits: 8 }) + this.getTooltipMinMaxText(min, max) + "</span>\n    ";
     };
     CircleSeriesComponent.prototype.getTooltipMinMaxText = function (min, max) {
         if (min !== undefined || max !== undefined) {
@@ -108,7 +108,7 @@ var CircleSeriesComponent = /** @class */ (function () {
                 if (max === undefined) {
                     result += '≥';
                 }
-                result += min.toLocaleString();
+                result += min.toLocaleString(undefined, { maximumFractionDigits: 8 });
                 if (max !== undefined) {
                     result += ' - ';
                 }
@@ -117,7 +117,7 @@ var CircleSeriesComponent = /** @class */ (function () {
                 result += '≤';
             }
             if (max !== undefined) {
-                result += max.toLocaleString();
+                result += max.toLocaleString(undefined, { maximumFractionDigits: 8 });
             }
             result += ')';
             return result;

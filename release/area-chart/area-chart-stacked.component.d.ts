@@ -16,6 +16,7 @@ export declare class AreaChartStackedComponent extends BaseChartComponent {
     showGridLines: boolean;
     curve: any;
     activeEntries: any[];
+    hiddenEntries: any[];
     schemeType: string;
     xAxisTickFormatting: any;
     yAxisTickFormatting: any;
@@ -29,6 +30,8 @@ export declare class AreaChartStackedComponent extends BaseChartComponent {
     yScaleMax: number;
     activate: EventEmitter<any>;
     deactivate: EventEmitter<any>;
+    hidden: EventEmitter<any>;
+    shown: EventEmitter<any>;
     tooltipTemplate: TemplateRef<any>;
     seriesTooltipTemplate: TemplateRef<any>;
     dims: ViewDimensions;
@@ -36,6 +39,7 @@ export declare class AreaChartStackedComponent extends BaseChartComponent {
     xDomain: any[];
     xSet: any[];
     yDomain: any[];
+    yLabelDomain: any[];
     seriesDomain: any;
     xScale: any;
     yScale: any;
@@ -57,9 +61,12 @@ export declare class AreaChartStackedComponent extends BaseChartComponent {
     timelineTransform: any;
     timelinePadding: number;
     update(): void;
+    isHidden(entry: any): boolean;
+    toggleHidden(item: any): void;
     updateTimeline(): void;
+    getUniqueXDomainValues(results: any[], hidden?: boolean): any[];
     getXDomain(): any[];
-    getYDomain(): any[];
+    getYDomain(hidden: boolean): any[];
     getSeriesDomain(): any[];
     getXScale(domain: any, width: any): any;
     getYScale(domain: any, height: any): any;
