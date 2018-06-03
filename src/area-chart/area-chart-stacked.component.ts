@@ -16,7 +16,7 @@ import { calculateViewDimensions, ViewDimensions } from '../common/view-dimensio
 import { ColorHelper } from '../common/color.helper';
 import { BaseChartComponent } from '../common/base-chart.component';
 import { id } from '../utils/id';
-import { getUniqueXDomainValues } from '../common/domain.helper';
+//import { getUniqueXDomainValues } from '../common/domain.helper';
 
 @Component({
   selector: 'ngx-charts-area-chart-stacked',
@@ -26,10 +26,12 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
       [showLegend]="legend"
       [legendOptions]="legendOptions"
       [activeEntries]="activeEntries"
+      [hiddenEntries]="hiddenEntries"
       [animations]="animations"
       (legendLabelClick)="onClick($event)"
       (legendLabelActivate)="onActivate($event)"
-      (legendLabelDeactivate)="onDeactivate($event)">
+      (legendLabelDeactivate)="onDeactivate($event)"
+      (legendLabelToggleHide)="toggleHidden($event)">
       <svg:defs>
         <svg:clipPath [attr.id]="clipPathId">
           <svg:rect
@@ -64,6 +66,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
         <svg:g [attr.clip-path]="clipPath">
           <svg:g *ngFor="let series of results; trackBy:trackBy">
             <svg:g ngx-charts-area-series
+              *ngIf="!isHidden(series)"
               [xScale]="xScale"
               [yScale]="yScale"
               [colors]="colors"
@@ -85,6 +88,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
               [yScale]="yScale"
               [results]="results"
               [colors]="colors"
+              [hiddenEntries]="hiddenEntries"
               [tooltipDisabled]="tooltipDisabled"
               [tooltipTemplate]="seriesTooltipTemplate"
               (hover)="updateHoveredVertical($event)"
@@ -92,6 +96,7 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
 
             <svg:g *ngFor="let series of results; trackBy:trackBy">
               <svg:g ngx-charts-circle-series
+                *ngIf="!isHidden(series)"
                 type="stacked"
                 [xScale]="xScale"
                 [yScale]="yScale"
@@ -120,9 +125,11 @@ import { getUniqueXDomainValues } from '../common/domain.helper';
         [customColors]="customColors"
         [legend]="legend"
         [scaleType]="scaleType"
+        [hiddenEntries]="hiddenEntries"
         (onDomainChange)="updateDomain($event)">
         <svg:g *ngFor="let series of results; trackBy:trackBy">
           <svg:g ngx-charts-area-series
+            *ngIf="!isHidden(series)"
             [xScale]="timelineXScale"
             [yScale]="timelineYScale"
             [colors]="colors"
@@ -156,6 +163,7 @@ export class AreaChartStackedComponent extends BaseChartComponent {
   @Input() showGridLines: boolean = true;
   @Input() curve: any = curveLinear;
   @Input() activeEntries: any[] = [];
+  @Input() hiddenEntries: any[] = [];
   @Input() schemeType: string;
   @Input() xAxisTickFormatting: any;
   @Input() yAxisTickFormatting: any;
@@ -170,6 +178,8 @@ export class AreaChartStackedComponent extends BaseChartComponent {
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  @Output() hidden: EventEmitter<any> = new EventEmitter();
+  @Output() shown: EventEmitter<any> = new EventEmitter();
 
   @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
   @ContentChild('seriesTooltipTemplate') seriesTooltipTemplate: TemplateRef<any>;
@@ -179,6 +189,7 @@ export class AreaChartStackedComponent extends BaseChartComponent {
   xDomain: any[];
   xSet: any[]; // the set of all values on the X Axis
   yDomain: any[];
+  yLabelDomain: any[];
   seriesDomain: any;
   xScale: any;
   yScale: any;
@@ -227,7 +238,8 @@ export class AreaChartStackedComponent extends BaseChartComponent {
       this.xDomain = this.filteredDomain;
     }
 
-    this.yDomain = this.getYDomain();
+    this.yDomain = this.getYDomain(true);
+    this.yLabelDomain = this.getYDomain(false);
     this.seriesDomain = this.getSeriesDomain();
 
     this.xScale = this.getXScale(this.xDomain, this.dims.width);
@@ -237,6 +249,9 @@ export class AreaChartStackedComponent extends BaseChartComponent {
       const val = this.xSet[i];
       let d0 = 0;
       for (const group of this.results) {
+        if (this.isHidden({ name: group.name })) {
+          continue;
+        }
 
         let d = group.series.find(item => {
           let a = item.name;
@@ -275,6 +290,33 @@ export class AreaChartStackedComponent extends BaseChartComponent {
     this.clipPath = `url(#${this.clipPathId})`;
   }
 
+  isHidden(entry): boolean {
+    if (!this.hiddenEntries) {
+      return false;
+    }
+    const item = this.hiddenEntries.find(d => {
+      return entry.name === d.name;
+    });
+    return item !== undefined;
+  }
+
+  toggleHidden(item): void {
+    const idx = this.hiddenEntries.findIndex(d => {
+      return d.name === item.name;
+    });
+
+    if (idx > -1) {
+      this.hiddenEntries.splice(idx, 1);
+      this.hiddenEntries = [...this.hiddenEntries];
+      this.shown.emit({ value: item, entries: this.hiddenEntries });
+    } else {
+      this.hiddenEntries = [ item, ...this.hiddenEntries ];
+      this.hidden.emit({ value: item, entries: this.hiddenEntries });
+    }
+
+    this.update();
+  }
+
   updateTimeline(): void {
     if (this.timeline) {
       this.timelineWidth = this.dims.width;
@@ -285,8 +327,22 @@ export class AreaChartStackedComponent extends BaseChartComponent {
     }
   }
 
+  getUniqueXDomainValues(results: any[], hidden: boolean = true): any[] {
+    const valueSet = new Set();
+    for (const result of results) {
+      if (this.isHidden({ name: result.name }) && hidden) {
+        continue;
+      }
+      for (const d of result.series) {
+        valueSet.add(d.name);
+      }
+    }
+    return Array.from(valueSet);
+  }
+
+
   getXDomain(): any[] {
-    let values = getUniqueXDomainValues(this.results);
+    let values = this.getUniqueXDomainValues(this.results);
 
     this.scaleType = this.getScaleType(values);
     let domain = [];
@@ -328,13 +384,16 @@ export class AreaChartStackedComponent extends BaseChartComponent {
     return domain;
   }
 
-  getYDomain(): any[] {
+  getYDomain(hidden: boolean): any[] {
     const domain = [];
 
     for (let i = 0; i < this.xSet.length; i++) {
       const val = this.xSet[i];
       let sum = 0;
       for (const group of this.results) {
+        if (this.isHidden({ name: group.name }) && hidden) {
+          continue;
+        }
         const d = group.series.find(item => {
           let a = item.name;
           let b = val;
@@ -459,7 +518,7 @@ export class AreaChartStackedComponent extends BaseChartComponent {
     if (this.schemeType === 'ordinal') {
       domain = this.seriesDomain;
     } else {
-      domain = this.yDomain;
+      domain = this.yLabelDomain;
     }
 
     this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
@@ -477,7 +536,7 @@ export class AreaChartStackedComponent extends BaseChartComponent {
       opts.colors = this.colors;
       opts.title = this.legendTitle;
     } else {
-      opts.domain = this.yDomain;
+      opts.domain = this.yLabelDomain;
       opts.colors = this.colors.scale;
     }
     return opts;
